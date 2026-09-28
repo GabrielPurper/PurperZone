@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projetos — PurperZone</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body data-page="projects">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__brand">PurperZone</div>
+      <nav class="sidebar__nav">
+        <a class="sidebar__link" data-page="profile" href="profile.html">Perfil</a>
+        <a class="sidebar__link" data-page="projects" href="projects.html">Projetos</a>
+        <a class="sidebar__link" data-page="library" href="library.html">Biblioteca</a>
+      </nav>
+      <button class="btn btn--ghost" id="logout-btn" style="margin-top: auto">
+        Sair
+      </button>
+    </aside>
+
+    <main class="content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6)">
+        <h1 style="font-family: var(--font-display); font-size: var(--text-xl)">
+          Projetos
+        </h1>
+        <button class="btn btn--primary" id="new-project-btn">Novo projeto</button>
+      </div>
+
+      <!-- Formulário de criação, escondido até o clique em "Novo projeto" -->
+      <form class="card" id="new-project-form" hidden style="margin-bottom: var(--space-6)">
+        <div class="field">
+          <label for="project-name">Nome</label>
+          <input type="text" id="project-name" required />
+        </div>
+        <div class="field" style="margin-top: var(--space-3)">
+          <label for="project-description">Descrição</label>
+          <input type="text" id="project-description" />
+        </div>
+        <div class="field" style="margin-top: var(--space-3)">
+          <label for="project-repo">Link do repositório</label>
+          <input type="url" id="project-repo" placeholder="https://github.com/..." />
+        </div>
+        <div class="field" style="margin-top: var(--space-3)">
+          <label for="project-stack">Stack (separada por vírgula)</label>
+          <input type="text" id="project-stack" placeholder="Python, TypeScript" />
+        </div>
+        <button type="submit" class="btn btn--primary" style="margin-top: var(--space-4)">
+          Salvar
+        </button>
+      </form>
+
+      <section id="projects-container">
+        <!-- Preenchido dinamicamente por projects.js -> loadProjects() -->
+      </section>
+    </main>
+  </div>
+
+  <!-- Ordem importa: supabase-js -> supabaseClient.js -> auth.js -> projects.js -> este script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/projects.js"></script>
+  <script>
+    document.getElementById("logout-btn").addEventListener("click", signOut);
+
+    const containerEl = document.getElementById("projects-container");
+    let currentUserId = null;
+
+    (async function init() {
+      const user = await requireAuth();
+      if (!user) return;
+      currentUserId = user.id;
+      await loadProjects(currentUserId, containerEl);
+    })();
+
+    const formEl = document.getElementById("new-project-form");
+    document.getElementById("new-project-btn").addEventListener("click", () => {
+      formEl.hidden = !formEl.hidden;
+    });
+
+    formEl.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const techStack = document
+        .getElementById("project-stack")
+        .value.split(",")
+        .map((tech) => tech.trim())
+        .filter(Boolean); // remove itens vazios (ex: vírgula sobrando)
+
+      const { error } = await createProject({
+        name: document.getElementById("project-name").value,
+        description: document.getElementById("project-description").value,
+        repoUrl: document.getElementById("project-repo").value,
+        techStack,
+      });
+
+      if (error) {
+        alert(error.message ?? error);
+        return;
+      }
+
+      formEl.reset();
+      formEl.hidden = true;
+      await loadProjects(currentUserId, containerEl);
+    });
+  </script>
+</body>
+</html>

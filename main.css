@@ -1,0 +1,354 @@
+/* ============================================================
+   PurperZone — main.css
+   Layout geral + componentes reutilizados em várias páginas.
+   Depende de variables.css e reset.css (importados antes deste).
+   ============================================================ */
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+}
+
+/* ------------------------------------------------------------
+   Layout raiz: barra lateral fixa + conteúdo rolável.
+   Em telas estreitas, a sidebar vira uma barra superior.
+   ------------------------------------------------------------ */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.sidebar__brand {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sidebar__link {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sidebar__link:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* A página atual recebe esta classe via data-attribute no <body>;
+   veja o comentário em js/auth.js sobre a navegação ativa. */
+.sidebar__link--active {
+  background: var(--accent-dim);
+  color: var(--accent-strong);
+}
+
+.content {
+  padding: var(--space-8) var(--space-12);
+  max-width: var(--max-width);
+}
+
+/* ------------------------------------------------------------
+   Cabeçalho de perfil (usado em profile.html)
+   ------------------------------------------------------------ */
+.profile-header {
+  display: flex;
+  gap: var(--space-6);
+  align-items: flex-start;
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-8);
+}
+
+.profile-header__avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-dim);
+  object-fit: cover;
+  background: var(--surface); /* aparece enquanto a imagem carrega */
+}
+
+.profile-header__name {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+}
+
+.profile-header__username {
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+.profile-header__bio {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  max-width: 60ch; /* linhas curtas, texto mais legível */
+}
+
+.profile-header__stats {
+  display: flex;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.profile-header__stats strong {
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+/* ------------------------------------------------------------
+   Abas (Feed / Projetos / Biblioteca) dentro do perfil
+   ------------------------------------------------------------ */
+.tabs {
+  display: flex;
+  gap: var(--space-6);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-6);
+}
+
+.tabs__item {
+  padding-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+}
+
+.tabs__item--active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* ------------------------------------------------------------
+   Card genérico — base para post, projeto e item da biblioteca
+   ------------------------------------------------------------ */
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4) var(--space-6);
+}
+
+.card + .card {
+  margin-top: var(--space-4);
+}
+
+/* --- Projeto (estilo GitHub) --- */
+.project-card__name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.project-card__description {
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.project-card__meta {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
+.tag {
+  display: inline-block;
+  background: var(--accent-dim);
+  color: var(--accent-strong);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-2);
+}
+
+/* --- Post (estilo Instagram) --- */
+.post-card__image {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-3);
+}
+
+.post-card__meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  margin-top: var(--space-3);
+}
+
+/* --- Item de biblioteca (estilo Steam) --- */
+.library-item {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.library-item__cover {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--surface);
+}
+
+.library-item__title {
+  font-weight: 600;
+}
+
+.library-item__hours {
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+.status-badge {
+  font-size: var(--text-xs);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+}
+
+.status-badge--playing { background: color-mix(in srgb, var(--warning) 20%, transparent); color: var(--warning); }
+.status-badge--completed { background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success); }
+.status-badge--backlog,
+.status-badge--dropped { background: var(--surface); color: var(--text-faint); }
+
+/* ------------------------------------------------------------
+   Formulários (login.html)
+   ------------------------------------------------------------ */
+.auth-form {
+  max-width: 360px;
+  margin: var(--space-12) auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.field input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+.field input:focus {
+  border-color: var(--accent);
+}
+
+.btn {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-align: center;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: #100C18;
+}
+
+.btn--primary:hover {
+  background: var(--accent-strong);
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* Mensagem de erro/sucesso exibida pelos scripts de auth.js */
+.form-message {
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  display: none; /* js remove/adiciona a classe abaixo ao usar */
+}
+
+.form-message--error {
+  display: block;
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+
+.form-message--success {
+  display: block;
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+  color: var(--success);
+}
+
+/* Estado vazio — quando uma lista (posts/projetos/library) ainda não tem itens */
+.empty-state {
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  padding: var(--space-8) 0;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------
+   Responsivo: sidebar vira barra superior em telas estreitas
+   ------------------------------------------------------------ */
+@media (max-width: 720px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-4);
+  }
+
+  .sidebar__nav {
+    flex-direction: row;
+  }
+
+  .content {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .profile-header {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entrar — PurperZone</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <main>
+    <form class="auth-form" id="login-form">
+      <h1 style="font-family: var(--font-display); font-size: var(--text-xl)">
+        Entrar no PurperZone
+      </h1>
+
+      <div class="form-message" id="form-message"></div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" required autocomplete="email" />
+      </div>
+
+      <div class="field">
+        <label for="password">Senha</label>
+        <input
+          type="password"
+          id="password"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+
+      <!-- Só aparece no modo "criar conta"; controlado por toggleMode() abaixo -->
+      <div class="field" id="username-field" hidden>
+        <label for="username">Nome de usuário</label>
+        <input type="text" id="username" autocomplete="username" />
+      </div>
+
+      <button type="submit" class="btn btn--primary" id="submit-btn">
+        Entrar
+      </button>
+
+      <button type="button" class="btn btn--ghost" id="toggle-mode-btn">
+        Não tem conta? Criar uma
+      </button>
+    </form>
+  </main>
+
+  <!-- Ordem importa: supabase-js -> supabaseClient.js -> auth.js -> este script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Controla se o formulário está em modo "login" ou "cadastro".
+    let mode = "login";
+
+    const form = document.getElementById("login-form");
+    const messageEl = document.getElementById("form-message");
+    const usernameField = document.getElementById("username-field");
+    const submitBtn = document.getElementById("submit-btn");
+    const toggleBtn = document.getElementById("toggle-mode-btn");
+
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = `form-message form-message--${type}`;
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      mode = mode === "login" ? "signup" : "login";
+      usernameField.hidden = mode === "login";
+      submitBtn.textContent = mode === "login" ? "Entrar" : "Criar conta";
+      toggleBtn.textContent =
+        mode === "login" ? "Não tem conta? Criar uma" : "Já tem conta? Entrar";
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const username = document.getElementById("username").value;
+
+      const { error } =
+        mode === "login"
+          ? await signIn(email, password)
+          : await signUp(email, password, username);
+
+      if (error) {
+        showMessage(error.message, "error");
+        return;
+      }
+
+      if (mode === "signup") {
+        showMessage(
+          "Conta criada! Verifique seu email para confirmar.",
+          "success"
+        );
+        return;
+      }
+
+      // Login bem-sucedido: vai para o próprio perfil.
+      window.location.href = "profile.html";
+    });
+  </script>
+</body>
+</html>
