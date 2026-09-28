@@ -1,3 +1,37 @@
+# 🌐 PurperZone
+
+> Site pessoal e portfólio profissional de **Gabriel Purper**.
+
+![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-brightgreen?style=flat-square&logo=github)
+![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-blue?style=flat-square)
+
+---
+
+## 📌 Sobre o Projeto
+
+O **PurperZone** é o meu portal pessoal hospedado no GitHub Pages. Ele reúne meu currículo, minhas habilidades técnicas, projetos em destaque e os canais de contato profissional.
+
+🔗 **Acesse o site ao vivo:** [gabrielpurper.github.io/PurperZone](https://gabrielpurper.github.io/PurperZone/)
+
+---
+
+## 🛠️ Habilidades & Tecnologias
+
+- **Front-end:** HTML5, CSS3, JavaScript
+- **Ferramentas & Controle de Versão:** Git, GitHub, GitHub Pages
+- **Perfil Profissional:** Resolução de problemas, desenvolvimento web, prototipagem
+
+---
+
+## 🔗 Redes & Contato
+
+- 📂 **GitHub:** [github.com/GabrielPurper](https://github.com/GabrielPurper)
+- 💼 **LinkedIn:** [Adicione seu link do LinkedIn aqui](https://www.linkedin.com/in/seu-usuario)
+- ✉️ **E-mail:** [seu-email@exemplo.com](mailto:seu-email@exemplo.com)
+
+---
+*Desenvolvido por Gabriel Purper.*
+
 # PurperZone — base do projeto
 
 Base da plataforma PurperZone: perfil de usuário que junta projetos
