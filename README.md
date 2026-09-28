@@ -23,9 +23,9 @@ O **PurperZone** é o meu portal pessoal hospedado no GitHub Pages.
 
 ## 🔗 Redes & Contato
 
+- 💼 **LinkedIn:** [Gabriel Purper](https://www.linkedin.com/in/gabriel-purper-andrade-e-silva-05b36534a/)
 - 📂 **GitHub:** [github.com/GabrielPurper](https://github.com/GabrielPurper)
-- 💼 **LinkedIn:** [Adicione seu link do LinkedIn aqui](https://www.linkedin.com/in/gabriel-purper-andrade-e-silva-05b36534a/)
-- ✉️ **E-mail:** [seu-email@exemplo.com](mailto:Gabriel.Purper@hotmail.com)
+- ✉️ **E-mail:** [Gabriel.Purper@hotmail.com](mailto:Gabriel.Purper@hotmail.com)
 
 ---
 *Desenvolvido por Gabriel Purper.*
