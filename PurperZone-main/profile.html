@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perfil — PurperZone</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<!-- data-page identifica esta página para o destaque de navegação em auth.js -->
+<body data-page="profile">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__brand">PurperZone</div>
+      <nav class="sidebar__nav">
+        <a class="sidebar__link" data-page="profile" href="profile.html">Perfil</a>
+        <a class="sidebar__link" data-page="projects" href="projects.html">Projetos</a>
+        <a class="sidebar__link" data-page="library" href="library.html">Biblioteca</a>
+      </nav>
+      <button class="btn btn--ghost" id="logout-btn" style="margin-top: auto">
+        Sair
+      </button>
+    </aside>
+
+    <main class="content">
+      <header class="profile-header">
+        <img class="profile-header__avatar" id="avatar" alt="Avatar do usuário" />
+        <div>
+          <div class="profile-header__name" id="display-name">Carregando…</div>
+          <div class="profile-header__username" id="username-label"></div>
+          <p class="profile-header__bio" id="bio"></p>
+          <div class="profile-header__stats">
+            <span><strong data-stat="followers">0</strong> seguidores</span>
+            <span><strong data-stat="following">0</strong> seguindo</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="tabs">
+        <div class="tabs__item tabs__item--active">Feed</div>
+      </div>
+
+      <section id="feed-container">
+        <!-- Preenchido dinamicamente por profile.js -> loadFeed() -->
+      </section>
+    </main>
+  </div>
+
+  <!-- Ordem importa: supabase-js -> supabaseClient.js -> auth.js -> profile.js -> este script -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/profile.js"></script>
+  <script>
+    document.getElementById("logout-btn").addEventListener("click", signOut);
+
+    (async function init() {
+      // Lê ?u=nomedeusuario da URL; se não houver, mostra o próprio
+      // perfil do usuário logado (exige estar autenticado nesse caso).
+      const params = new URLSearchParams(window.location.search);
+      let username = params.get("u");
+
+      if (!username) {
+        const user = await requireAuth();
+        if (!user) return; // requireAuth já redireciona para login.html
+
+        const { data: ownProfile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .single();
+
+        username = ownProfile?.username;
+      }
+
+      if (!username) return;
+
+      const profile = await loadProfileHeader(username);
+      if (profile) {
+        await loadFeed(profile.id, document.getElementById("feed-container"));
+      }
+    })();
+  </script>
+</body>
+</html>
