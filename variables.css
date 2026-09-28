@@ -1,0 +1,11 @@
+:root{
+--bg:#09070d;--bg-soft:#0f0c15;--surface:#14101d;--surface-2:#1b1526;
+--border:rgba(255,255,255,.09);--accent:#9b5de5;--accent-strong:#c084fc;
+--accent-soft:rgba(155,93,229,.14);--text:#f7f4fb;--muted:#aaa2b8;--faint:#736a82;
+--success:#65d991;--danger:#f06b67;
+--font-display:"Space Grotesk","Segoe UI",sans-serif;--font-body:"Inter","Segoe UI",sans-serif;
+--font-mono:"JetBrains Mono","Courier New",monospace;
+--xs:.75rem;--sm:.875rem;--lg:1.15rem;--xl:1.8rem;--xxl:clamp(2.4rem,5vw,5rem);
+--s1:.25rem;--s2:.5rem;--s3:.75rem;--s4:1rem;--s6:1.5rem;--s8:2rem;--s12:3rem;
+--r:16px;--rl:24px;--sidebar:240px;--max:1180px;
+}
