@@ -1,0 +1,2 @@
+import fs from 'node:fs/promises';import path from 'node:path';import {fileURLToPath} from 'node:url';import ejs from 'ejs';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');const dist=path.join(root,'dist');await fs.rm(dist,{recursive:true,force:true});await fs.cp(root,dist,{recursive:true,filter:s=>!s.includes('/dist/')&&!s.includes('/node_modules/')&&!s.endsWith('.zip')});console.log('PurperZone: arquivos estáticos preparados em dist/.');
