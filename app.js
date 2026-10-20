@@ -1,71 +1,137 @@
-import { supabase, currentUser, DB, query } from './api/supabase.js';
+import { supabaseClient } from './supabaseClient.js';
 
-export const escapeHTML = (value = '') => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-export const formatDate = value => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle:'medium', timeStyle:'short' }).format(new Date(value)) : '';
-export const money = (cents, currency='BRL') => new Intl.NumberFormat('pt-BR',{style:'currency',currency:currency.toUpperCase()}).format((cents||0)/100);
-export const $ = (s, root=document) => root.querySelector(s);
-export const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+const $ = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+export const escapeHtml = (v='') => String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
-export function toast(message, type='info') {
-  let box = $('#toast');
-  if (!box) { box = document.createElement('div'); box.id='toast'; box.className='toast'; document.body.appendChild(box); }
-  box.textContent = message; box.dataset.type = type; box.classList.add('toast--visible');
-  clearTimeout(window.__toastTimer); window.__toastTimer = setTimeout(()=>box.classList.remove('toast--visible'), 3200);
+export const toast = (message,type='info',duration=4200) => {
+  let el=$('#toast');
+  if(!el){ el=document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); }
+  el.textContent=message; el.className=`toast toast--visible ${type}`;
+  clearTimeout(window.__purperToastTimer);
+  window.__purperToastTimer=setTimeout(()=>el.classList.remove('toast--visible'),duration);
+};
+
+export function setInlineMessage(target,message,type='info'){
+  const el=typeof target==='string'?$(target):target; if(!el)return;
+  el.hidden=false; el.className=`form-message ${type}`; el.textContent=message;
 }
 
-export function setLoading(el, loading, label='Carregando…') {
-  if (!el) return;
-  el.disabled = loading; el.dataset.loading = loading ? 'true' : 'false';
-  if (loading) { el.dataset.originalText = el.textContent; el.textContent = label; }
-  else if (el.dataset.originalText) el.textContent = el.dataset.originalText;
-}
-
-export async function requireAuth({ redirect='login.html' }={}) {
-  try { const user = await currentUser(); if (!user) { location.href=redirect; return null; } return user; }
-  catch { location.href=redirect; return null; }
-}
-
-export async function optionalUser() { try { return await currentUser(); } catch { return null; } }
-
-export function avatar(profile, size=48) {
-  const src = profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.display_name || profile?.username || 'P')}&background=151b22&color=ffffff&size=${size}`;
-  return `<img class="avatar" width="${size}" height="${size}" src="${escapeHTML(src)}" alt="Avatar de ${escapeHTML(profile?.display_name || profile?.username || 'usuário')}" loading="lazy">`;
-}
-
-export function navUser(profile) {
-  const el = $('#nav-user'); if (!el) return;
-  el.innerHTML = profile ? `${avatar(profile,32)}<span>${escapeHTML(profile.display_name || profile.username || 'Perfil')}</span>` : '<span>Entrar</span>';
-  el.href = profile ? `profile.html?id=${encodeURIComponent(profile.id)}` : 'login.html';
-}
-
-export async function bootstrapPage() {
-  document.documentElement.dataset.page = document.body.dataset.page || '';
-  const user = await optionalUser();
-  if (user) {
-    const profile = await loadProfile(user.id).catch(()=>null);
-    navUser(profile);
-    document.body.classList.add('is-authenticated');
-    $$('[data-auth-only]').forEach(x=>x.hidden=false);
-  } else {
-    $$('[data-auth-only]').forEach(x=>x.hidden=true);
+export function setButtonLoading(button,loading,label='Aguarde...'){
+  if(!button)return;
+  if(loading){
+    if(!button.dataset.originalText)button.dataset.originalText=button.textContent;
+    button.disabled=true; button.textContent=label; button.classList.add('is-loading');
+  }else{
+    button.disabled=false; button.textContent=button.dataset.originalText||button.textContent; button.classList.remove('is-loading');
   }
-  $$('[data-action="signout"]').forEach(btn => btn.addEventListener('click', async e => { e.preventDefault(); await supabase.auth.signOut(); location.href='index.html'; }));
-  await checkMaintenance();
 }
 
-async function checkMaintenance() {
-  // A configuração pública pode ser exposta pela tabela site_settings quando o RLS permitir leitura.
-  // Se ela não estiver acessível, o site continua normalmente; manutenção deve ser aplicada também no host.
+
+const MAINTENANCE_EXEMPT_PAGES = new Set(['maintenance.html', 'login.html', 'confirm-email.html', 'status.html']);
+
+async function enforceMaintenanceMode(){
+  const current = location.pathname.split('/').pop() || 'index.html';
+  if (MAINTENANCE_EXEMPT_PAGES.has(current)) return;
+  if (window.PURPERZONE_MAINTENANCE_MODE === true) {
+    location.replace(new URL('maintenance.html', location.href).href);
+    return;
+  }
+  if (!supabaseClient) return;
   try {
-    const rows = await query('site_settings', { eq:{key:'maintenance_mode'}, limit:1 });
-    const enabled = rows[0]?.value?.enabled === true || rows[0]?.value === true;
-    if (enabled && !location.pathname.endsWith('maintenance.html')) location.href='maintenance.html';
-  } catch { /* Falha de leitura não deve derrubar o frontend inteiro. */ }
+    const { data, error } = await supabaseClient.rpc('get_maintenance_status');
+    if (error) throw error;
+    if (data?.enabled) location.replace(new URL('maintenance.html', location.href).href);
+  } catch (error) {
+    // Se o serviço de configuração estiver indisponível, não travamos todo o site.
+    // As operações de escrita continuam protegidas pelo gatilho no banco durante manutenção.
+    console.warn('Não foi possível consultar o modo de manutenção:', error?.message || error);
+  }
 }
 
-export function subscribeTable(table, callback, filter) {
-  const channel = supabase.channel(`pz-${table}-${crypto.randomUUID()}`).on('postgres_changes', {event:'*', schema:'public', table, ...(filter ? {filter} : {})}, callback).subscribe();
-  return () => supabase.removeChannel(channel);
+export async function getUser(){
+  if(!supabaseClient)return null;
+  const {data,error}=await supabaseClient.auth.getUser();
+  if(error)return null;
+  return data.user||null;
 }
 
-window.PurperZone = { supabase, DB, toast, escapeHTML, formatDate, money };
+export async function requireAuth(){
+  const user=await getUser();
+  const current=location.pathname.split('/').pop()||'index.html';
+  if(!user&&!['login.html','index.html','404.html','maintenance.html'].includes(current)){
+    const next=encodeURIComponent(current+location.search);
+    location.href=`login.html?next=${next}`;
+    return null;
+  }
+  return user;
+}
+
+function updateAuthUI(session){
+  const signedIn=Boolean(session?.user);
+  document.documentElement.dataset.auth=signedIn?'signed-in':'signed-out';
+  $$('[data-auth-only]').forEach(el=>{el.hidden=!signedIn;});
+  $$('[data-guest-only]').forEach(el=>{el.hidden=signedIn;});
+  $$('[data-logout]').forEach(el=>{el.hidden=!signedIn;});
+  $$('[data-login-link]').forEach(el=>{el.hidden=signedIn;});
+  $$('[data-auth-account]').forEach(el=>{
+    if(signedIn){el.textContent='Perfil';el.href='profile.html';}
+    else{el.textContent='Entrar';el.href='login.html';}
+  });
+}
+
+export function setupNav(){
+  const page=location.pathname.split('/').pop()||'index.html';
+  $$('[data-nav]').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===page));
+  const toggle=$('[data-mobile-toggle]'),sidebar=$('.sidebar');
+  toggle?.addEventListener('click',()=>sidebar?.classList.toggle('open'));
+  document.addEventListener('click',e=>{
+    const link=e.target.closest('a');
+    if(!link||link.target==='_blank'||link.hasAttribute('download'))return;
+    const href=link.getAttribute('href')||'';
+    if(!href.includes('.html')||href.startsWith('http'))return;
+    if(!href.startsWith('#'))document.body.classList.add('page-leaving');
+  });
+}
+
+export function setupLogout(){
+  document.addEventListener('click',async e=>{
+    const button=e.target.closest('[data-logout]');
+    if(!button)return;
+    e.preventDefault();
+    setButtonLoading(button,true,'Saindo...');
+    try{
+      const {error}=await supabaseClient.auth.signOut({scope:'local'});
+      if(error)throw error;
+      toast('Você saiu da sua conta.','success');
+      setTimeout(()=>location.href='login.html?status=signed-out',250);
+    }catch(error){
+      setButtonLoading(button,false);
+      toast(error?.message||'Não foi possível sair da conta.','error');
+    }
+  });
+}
+
+export function setupAuthAwareUI(){
+  if(!supabaseClient)return;
+  supabaseClient.auth.getSession().then(({data})=>updateAuthUI(data.session));
+  supabaseClient.auth.onAuthStateChange((_event,session)=>updateAuthUI(session));
+}
+
+function setupPageMotion(){
+  document.body.classList.add('page-ready');
+  $$('main .card, main .page-head, main .list > *, main .grid > *').forEach((el,i)=>{el.dataset.reveal='';el.style.transitionDelay=`${Math.min(i,8)*35}ms`;});
+  const items=$$('[data-reveal]');
+  if(!('IntersectionObserver' in window)){items.forEach(x=>x.classList.add('is-visible'));return;}
+  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target);}}),{threshold:.08});
+  items.forEach(x=>observer.observe(x));
+}
+
+export function setupReturnMemory(){
+  const key='purperzone_last_page';
+  if(location.pathname.endsWith('feed.html'))sessionStorage.setItem(key,location.href);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&location.pathname.endsWith('feed.html'))sessionStorage.setItem(key,location.href);});
+}
+
+export function init(){void enforceMaintenanceMode();setupNav();setupLogout();setupAuthAwareUI();setupReturnMemory();setupPageMotion();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+init();

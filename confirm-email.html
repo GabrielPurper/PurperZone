@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b0714"><link rel="manifest" href="manifest.webmanifest">
+  <title>Confirmando e-mail — PurperZone</title><link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="auth-page">
+<main class="auth-confirm-shell">
+  <section class="auth-confirm-card card">
+    <a class="brand brand--large" href="index.html">Purper<span>Zone</span></a>
+    <div class="confirm-icon" id="confirm-icon">✦</div>
+    <span class="eyebrow">VERIFICAÇÃO DE CONTA</span>
+    <h1 id="confirm-title">Confirmando seu e-mail</h1>
+    <p id="confirm-text" class="muted">Estamos validando a confirmação enviada para o seu endereço.</p>
+    <div id="confirm-actions" class="form-actions" hidden>
+      <a class="btn btn--primary" href="login.html?status=email-confirmed">Entrar no PurperZone</a>
+      <a class="btn btn--ghost" href="login.html">Voltar ao login</a>
+    </div>
+  </section>
+</main>
+<script type="module">
+import { supabaseClient } from './supabaseClient.js';
+const title=document.querySelector('#confirm-title');
+const text=document.querySelector('#confirm-text');
+const icon=document.querySelector('#confirm-icon');
+const actions=document.querySelector('#confirm-actions');
+async function run(){
+  try{
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error)throw error;
+    if(data.session?.user){
+      icon.textContent='✓';
+      title.textContent='E-mail confirmado!';
+      text.textContent='Sua conta PurperZone foi confirmada. Agora você pode entrar e começar a usar a plataforma.';
+      actions.hidden=false;
+      setTimeout(()=>location.href='login.html?status=email-confirmed',1800);
+      return;
+    }
+    throw new Error('A confirmação não gerou uma sessão.');
+  }catch(error){
+    icon.textContent='!';
+    title.textContent='Não foi possível confirmar ainda';
+    text.textContent='O link pode ter expirado, já ter sido usado ou o endereço de retorno ainda não estar configurado no Supabase. Você pode voltar ao login e solicitar outro e-mail.';
+    actions.hidden=false;
+  }
+}
+run();
+</script>
+</body></html>

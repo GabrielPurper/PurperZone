@@ -1,1 +1,79 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="PurperZone — comunidade, projetos e games."><title>Configurações · PurperZone</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="reset.css"><link rel="stylesheet" href="variables.css"><link rel="stylesheet" href="main.css"></head><body data-page="settings"><div class="app-shell"><div data-layout></div><main class="content"><header class="topbar"><div><span class="eyebrow">PURPERZONE</span><h1 class="page-title">Configurações</h1></div><div class="topbar__actions"><a id="nav-user" class="user-link" href="login.html">Entrar</a></div></header><section class="card card--padded"><form id="profile-settings" class="form-grid"><input name="username" placeholder="Username"><input name="display_name" placeholder="Nome"><textarea name="bio" placeholder="Bio"></textarea><input name="country" placeholder="País"><input name="state" placeholder="Estado"><input name="city" placeholder="Cidade"><input name="phone" placeholder="Telefone"><button class="btn btn--primary">Salvar perfil</button></form></section><section class="card card--padded"><h2>Senha</h2><form id="password-form" class="form-row"><input name="password" type="password" minlength="8" placeholder="Nova senha" required><button class="btn btn--primary">Alterar senha</button></form></section><section class="settings-links"><a href="plans.html">Planos e assinatura →</a><a href="moderation.html">Minhas denúncias →</a><a href="jarvis.html">Jarvis →</a></section></main></div><div id="toast"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script type="module">import {bootstrapPage} from './app.js';import {renderLayout} from './layout.js';import * as Page from './settings.js';await renderLayout();await bootstrapPage();Page.initSettings?.();</script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head> <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0714"> <link rel="manifest" href="manifest.webmanifest"><title>Configurações — PurperZone</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar"><div class="container topbar-inner"><button class="icon-btn mobile-toggle" data-mobile-toggle>☰</button><a class="brand" href="index.html">Purper<span>Zone</span></a><nav class="nav"><a data-nav href="feed.html">Feed</a><a data-nav href="reels.html">Reels</a><a data-nav href="projects.html">Projetos</a><a data-nav href="games.html">Games</a><a data-nav href="library.html">Biblioteca</a><a data-nav href="apps.html">Apps</a><a data-nav href="store.html">Loja</a><a data-nav href="jarvis.html">Jarvis</a></nav><div class="top-actions"><a class="btn" href="search.html">Buscar</a><a class="btn" href="profile.html">Perfil</a></div></div></header>
+<main class="container layout settings-layout">
+<aside class="sidebar"><div class="sidebar-card"><a class="side-link" data-nav href="feed.html">◉ Feed</a><a class="side-link" data-nav href="reels.html">▷ Reels</a><a class="side-link" data-nav href="projects.html">⌘ Projetos</a><a class="side-link" data-nav href="games.html">◈ Games</a><a class="side-link" data-nav href="messages.html">✉ Mensagens</a><a class="side-link" data-nav href="notifications.html">♢ Notificações</a><a class="side-link" data-nav href="settings.html">⚙ Configurações</a><button class="side-link btn" data-logout>↪ Sair</button></div></aside>
+<section class="content settings-content">
+<div class="page-head"><div><span class="eyebrow">SUA CONTA</span><h1>Configurações</h1><p>Controle perfil, experiência, privacidade, notificações, segurança e mídia.</p></div><span id="settings-status" class="status-pill">Carregando...</span></div> <div class="settings-nav card" aria-label="Seções de configurações"> <button class="active" data-settings-tab="profile">Perfil</button><button data-settings-tab="experience">Experiência</button><button data-settings-tab="privacy">Privacidade</button><button data-settings-tab="notifications">Notificações</button><button data-settings-tab="audio">Áudio</button><button data-settings-tab="security" aria-controls="settings-security-panel">Segurança</button>
+</div>
+<div id="settings-message" class="form-message" hidden></div> <section class="settings-panel" data-settings-panel="profile">
+<div class="card settings-card"><div class="settings-card-head"><div><h2>Perfil público</h2><p>Essas informações aparecem no seu perfil e em áreas sociais.</p></div><span class="settings-icon">◎</span></div>
+<form id="profile-settings"><div class="form-grid">
+<div class="field"><label>Nome de exibição</label><input name="display_name" maxlength="80" placeholder="Seu nome"></div>
+<div class="field"><label>Username</label><div class="input-prefix"><span>@</span><input name="username" maxlength="30" placeholder="username"></div></div>
+<div class="field full"><label>Bio</label><textarea name="bio" maxlength="320" placeholder="Conte um pouco sobre você..."></textarea></div>
+<div class="field"><label>País</label><input name="country" autocomplete="country-name"></div><div class="field"><label>Estado</label><input name="state"></div><div class="field"><label>Cidade</label><input name="city"></div><div class="field"><label>E-mail da conta</label><input name="email" type="email" readonly></div>
+</div><div class="form-actions"><button class="btn btn--primary" type="submit">Salvar perfil</button><a class="btn" href="profile.html">Ver perfil</a></div></form></div>
+</section> <section class="settings-panel" data-settings-panel="experience" hidden>
+<div class="card settings-card"><div class="settings-card-head"><div><h2>Experiência</h2><p>Personalize como o PurperZone funciona no seu dispositivo.</p></div><span class="settings-icon">✦</span></div>
+<form id="experience-settings" class="setting-list">
+<label class="setting-row"><span><strong>Tema</strong><small>Aparência da interface.</small></span><select name="theme"><option value="system">Sistema</option><option value="dark">Escuro</option><option value="light">Claro</option></select></label>
+<label class="setting-row"><span><strong>Idioma</strong><small>Idioma principal da plataforma.</small></span><select name="language"><option value="pt-BR">Português (Brasil)</option><option value="en-US">English</option><option value="es">Español</option></select></label>
+<label class="setting-row"><span><strong>Reprodução automática</strong><small>Reproduzir vídeos e Reels automaticamente.</small></span><input type="checkbox" name="autoplay_media"></label>
+<label class="setting-row"><span><strong>Reduzir movimento</strong><small>Diminui animações e transições.</small></span><input type="checkbox" name="reduce_motion"></label>
+<label class="setting-row"><span><strong>Descoberta do perfil</strong><small>Permitir que outras pessoas encontrem você.</small></span><input type="checkbox" name="discoverability_enabled"></label>
+<label class="setting-row"><span><strong>Mensagens diretas</strong><small>Ativar o recurso de mensagens.</small></span><input type="checkbox" name="direct_messages_enabled"></label>
+<div class="form-actions"><button class="btn btn--primary" type="submit">Salvar experiência</button></div>
+</form></div>
+</section> <section class="settings-panel" data-settings-panel="privacy" hidden>
+<div class="card settings-card"><div class="settings-card-head"><div><h2>Privacidade</h2><p>Escolha quem pode ver e interagir com sua conta.</p></div><span class="settings-icon">◌</span></div>
+<form id="privacy-settings" class="setting-list">
+<label class="setting-row"><span><strong>Visibilidade do perfil</strong><small>Controle quem pode abrir seu perfil.</small></span><select name="profile_visibility"><option value="public">Público</option><option value="followers">Seguidores</option><option value="private">Privado</option></select></label>
+<label class="setting-row"><span><strong>Status online</strong><small>Mostrar quando você estiver online.</small></span><input type="checkbox" name="show_online_status"></label>
+<label class="setting-row"><span><strong>Último acesso</strong><small>Mostrar sua última atividade.</small></span><input type="checkbox" name="show_last_seen"></label>
+<label class="setting-row"><span><strong>Mensagens de</strong><small>Quem pode iniciar uma conversa.</small></span><select name="allow_direct_messages"><option value="everyone">Todos</option><option value="followers">Seguidores</option><option value="nobody">Ninguém</option></select></label>
+<label class="setting-row"><span><strong>Menções</strong><small>Quem pode mencionar seu perfil.</small></span><select name="allow_mentions"><option value="everyone">Todos</option><option value="followers">Seguidores</option><option value="nobody">Ninguém</option></select></label>
+<label class="setting-row"><span><strong>Recomendações personalizadas</strong><small>Usar sua atividade para melhorar descobertas.</small></span><input type="checkbox" name="personalized_recommendations"></label>
+<div class="form-actions"><button class="btn btn--primary" type="submit">Salvar privacidade</button></div>
+</form></div>
+</section> <section class="settings-panel" data-settings-panel="notifications" hidden>
+<div class="card settings-card"><div class="settings-card-head"><div><h2>Notificações</h2><p>Decida quais atualizações você quer receber.</p></div><span class="settings-icon">♢</span></div>
+<form id="notification-settings" class="setting-list">
+<label class="setting-row"><span><strong>Geral</strong><small>Notificações principais da plataforma.</small></span><input type="checkbox" name="general_enabled"></label>
+<label class="setting-row"><span><strong>Social</strong><small>Seguidores, reações, comentários e mensagens.</small></span><input type="checkbox" name="social_enabled"></label>
+<label class="setting-row"><span><strong>Promocionais</strong><small>Novidades, planos, loja e ofertas.</small></span><input type="checkbox" name="promotional_enabled"></label>
+<label class="setting-row"><span><strong>Eventos e lives</strong><small>Eventos, shows, lives e atividades especiais.</small></span><input type="checkbox" name="event_enabled"></label>
+<label class="setting-row"><span><strong>Games</strong><small>Atualizações relacionadas a jogos.</small></span><input type="checkbox" name="games_enabled"></label>
+<label class="setting-row"><span><strong>Apps</strong><small>Novos aplicativos e atualizações.</small></span><input type="checkbox" name="apps_enabled"></label>
+<label class="setting-row"><span><strong>Loja</strong><small>Pedidos, produtos e carrinho.</small></span><input type="checkbox" name="store_enabled"></label>
+<label class="setting-row"><span><strong>Jarvis</strong><small>Sessões, automações e alertas do Jarvis.</small></span><input type="checkbox" name="jarvis_enabled"></label>
+<label class="setting-row"><span><strong>Segurança</strong><small>Logins, dispositivos e alertas importantes.</small></span><input type="checkbox" name="security_enabled"></label>
+<label class="setting-row"><span><strong>Push</strong><small>Notificações no navegador/dispositivo.</small></span><input type="checkbox" name="push_enabled"></label>
+<label class="setting-row"><span><strong>E-mail</strong><small>Receber atualizações por e-mail.</small></span><input type="checkbox" name="email_enabled"></label>
+<div class="form-actions"><button class="btn btn--primary" type="submit">Salvar notificações</button></div>
+</form></div>
+</section> <section class="settings-panel" data-settings-panel="audio" hidden>
+<div class="card settings-card"><div class="settings-card-head"><div><h2>Áudio e mídia</h2><p>Preferências para música e reprodução contínua.</p></div><span class="settings-icon">♫</span></div>
+<form id="audio-settings" class="setting-list">
+<label class="setting-row"><span><strong>Música</strong><small>Ativar trilhas e áudio contextual.</small></span><input type="checkbox" name="music_enabled"></label>
+<label class="setting-row setting-row--stack"><span><strong>Volume</strong><small>Volume padrão do player.</small></span><input type="range" name="volume" min="0" max="1" step="0.05"></label>
+<label class="setting-row"><span><strong>Continuar entre páginas</strong><small>Preservar a reprodução ao navegar.</small></span><input type="checkbox" name="continue_between_pages"></label>
+<label class="setting-row"><span><strong>Lembrar posição</strong><small>Retomar música e mídia de onde parou.</small></span><input type="checkbox" name="remember_position"></label>
+<label class="setting-row"><span><strong>Economia de dados</strong><small>Reduzir qualidade quando necessário.</small></span><input type="checkbox" name="data_saver"></label>
+<label class="setting-row"><span><strong>Qualidade preferida</strong><small>Qualidade padrão de reprodução.</small></span><select name="preferred_quality"><option value="auto">Automática</option><option value="low">Baixa</option><option value="standard">Padrão</option><option value="high">Alta</option></select></label>
+<div class="form-actions"><button class="btn btn--primary" type="submit">Salvar áudio</button></div>
+</form></div>
+</section> <section class="settings-panel" id="settings-security-panel" data-settings-panel="security" hidden>
+<div class="card settings-card"><div class="settings-card-head"><div><h2>Segurança da conta</h2><p>Atualize sua senha e confira a sessão atual.</p></div><span class="settings-icon">⌁</span></div>
+<div id="security-summary" class="security-summary"></div>
+<form id="password-form" class="password-box"><div class="field"><label>Nova senha</label><input name="password" type="password" minlength="8" autocomplete="new-password" placeholder="Pelo menos 8 caracteres"></div><div class="field"><label>Confirmar nova senha</label><input name="confirm_password" type="password" minlength="8" autocomplete="new-password" placeholder="Repita a nova senha"></div><div class="form-actions"><button class="btn btn--primary" type="submit">Atualizar senha</button></div></form>
+<hr><div class="danger-zone"><div><strong>Encerrar sessão</strong><p>Remove a sessão deste navegador e retorna para a tela de login.</p></div><button class="btn" data-logout>↪ Sair da conta</button></div>
+</div></section>
+</section>
+<aside class="rightbar"><div class="card account-card"><span class="eyebrow">CONTA</span><strong id="settings-account-name">PurperZone</strong><p class="muted" id="settings-account-email">Carregando conta...</p><a class="btn" href="plans.html">Ver meu plano</a></div><div class="card"><strong>Configurações sincronizadas</strong><p class="muted">As preferências desta tela são salvas no Supabase e podem acompanhar sua conta.</p></div></aside>
+</main></div><div id="toast" class="toast"></div><script type="module" src="app.js"></script><script type="module" src="settings.js"></script>
+</body></html>

@@ -1,25 +1,16 @@
 # PurperZone — atualização em tempo real
 
-O frontend usa `supabase.channel(...).on('postgres_changes', ...)` para receber alterações do banco.
+O frontend pode usar `supabase.channel(...).on('postgres_changes', ...)` para receber alterações do banco.
 
-## Habilitar no Supabase
-
-Na publicação Realtime do projeto, habilite:
+Tabelas prioritárias:
 
 - `profiles`
 - `posts`
 - `projects`
 - `library_items`
 - `follows`
+- `notifications`
 
-Depois de habilitar, alterações inseridas/atualizadas/removidas nessas tabelas podem atualizar a interface sem reload.
+O Realtime deve ser habilitado na publicação do Supabase para as tabelas desejadas.
 
-## Fallback
-
-Mesmo com Realtime, o frontend também:
-
-1. carrega os dados ao abrir;
-2. atualiza a cada 30 segundos enquanto a aba está visível;
-3. atualiza quando o usuário volta para a aba.
-
-Isso evita que uma configuração temporariamente indisponível deixe a interface desatualizada.
+Como fallback, as páginas podem recarregar os dados ao abrir, ao retornar para a aba e em intervalos curtos quando necessário.

@@ -1,1 +1,36 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Manutenção · PurperZone</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="reset.css"><link rel="stylesheet" href="variables.css"><link rel="stylesheet" href="main.css"></head><body class="center-page"><main class="maintenance card"><span class="hero__badge">PURPERZONE / MAINTENANCE</span><h1>Estamos preparando a próxima versão.</h1><p>Algumas funcionalidades podem ficar temporariamente indisponíveis enquanto a plataforma recebe atualizações.</p><button class="btn btn--primary" onclick="location.reload()">Tentar novamente</button><a href="index.html">Voltar para o início</a></main></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070a0f">
+  <meta name="robots" content="noindex, nofollow">
+  <title>PurperZone — Em manutenção</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="auth">
+    <section class="card auth-card" style="text-align:center">
+      <div class="brand-center"><a class="brand" href="index.html">Purper<span>Zone</span></a></div>
+      <p class="eyebrow">PAUSA PARA MELHORAR</p>
+      <h1>Estamos em manutenção</h1>
+      <p id="maintenance-message" class="muted">O PurperZone está passando por melhorias. Algumas funções estão temporariamente indisponíveis para proteger seus dados.</p>
+      <p class="muted">Tente novamente em alguns minutos.</p>
+      <div class="actions" style="justify-content:center">
+        <button class="btn btn--primary" type="button" onclick="location.reload()">Verificar novamente</button>
+        <a class="btn" href="login.html">Entrar na conta</a>
+      </div>
+    </section>
+  </main>
+  <script type="module">
+    import { supabaseClient } from './supabaseClient.js';
+    const target = document.querySelector('#maintenance-message');
+    if (supabaseClient) {
+      supabaseClient.rpc('get_maintenance_status').then(({ data, error }) => {
+        if (!error && data?.message && target) target.textContent = data.message;
+      }).catch(() => {});
+    }
+  </script>
+</body>
+</html>

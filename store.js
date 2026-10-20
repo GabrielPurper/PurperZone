@@ -1,29 +1,6 @@
-import { DB, query, insert, supabase } from '../api/supabase.js';
-import { requireAuth, escapeHTML, money, toast } from '../app.js';
-
-export async function initStore(){
-  const user=await requireAuth(); if(!user)return;
-  const host=document.querySelector('#products-list');
-  try{
-    const rows=await query(DB.products,{eq:{active:true},order:{column:'created_at',ascending:false},limit:100});
-    host.innerHTML=rows.length?rows.map(p=>`<article class="product-card card"><img src="${escapeHTML(p.image_url||'https://placehold.co/640x420/151b22/fff?text=PurperZone')}" alt=""><div><span class="eyebrow">${escapeHTML(p.product_type||'produto')}</span><h3>${escapeHTML(p.name)}</h3><p>${escapeHTML(p.description||'')}</p><strong>${money(p.price_cents,p.currency||'BRL')}</strong><button class="btn btn--primary" data-product="${p.id}">Adicionar ao carrinho</button></div></article>`).join(''):'<div class="empty-state">A loja está pronta, mas ainda não há produtos publicados.</div>';
-    host.querySelectorAll('[data-product]').forEach(b=>b.onclick=()=>addToCart(user.id,b.dataset.product,rows.find(p=>p.id===b.dataset.product)));
-  }catch(e){host.innerHTML='<div class="empty-state">Não foi possível carregar a loja.</div>'}
-}
-
-async function getOrCreateCart(userId){
-  const carts=await query(DB.carts,{eq:{user_id:userId},order:{column:'updated_at',ascending:false},limit:1});
-  if(carts[0])return carts[0];
-  return insert(DB.carts,{user_id:userId,currency:'brl'});
-}
-
-async function addToCart(userId,productId,product){
-  try{
-    const cart=await getOrCreateCart(userId);
-    const existing=await query(DB.cartItems,{eq:{cart_id:cart.id,product_id:productId},limit:1});
-    if(existing[0]){
-      const {error}=await supabase.from(DB.cartItems).update({quantity:existing[0].quantity+1,unit_price_cents:product.price_cents}).eq('id',existing[0].id);if(error)throw error;
-    }else await insert(DB.cartItems,{cart_id:cart.id,product_id:productId,quantity:1,unit_price_cents:product.price_cents});
-    toast('Produto adicionado ao carrinho.','success');
-  }catch(e){toast(e.message,'error')}
-}
+import{supabaseClient}from'./supabaseClient.js';import{escapeHtml,toast,requireAuth,setButtonLoading}from'./app.js';
+const list=document.querySelector('#products-list');let user=null;
+async function load(){if(!list)return;if(!supabaseClient){list.innerHTML='<div class="empty">Supabase não configurado.</div>';return}const{data,error}=await supabaseClient.from('products').select('id,name,description,price_cents,currency,image_url,product_type,stock,active').eq('active',true).order('created_at',{ascending:false});if(error){list.innerHTML=`<div class="empty error">${escapeHtml(error.message)}</div>`;return}list.innerHTML=(data||[]).map(x=>`<article class="card product-card interactive">${x.image_url?`<img class="product-cover-img" src="${escapeHtml(x.image_url)}" alt="">`:'<div class="product-cover"></div>'}<span class="tag">${escapeHtml(x.product_type||'Produto')}</span><h3>${escapeHtml(x.name)}</h3><p class="muted">${escapeHtml(x.description||'')}</p><div class="price">${(Number(x.price_cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:(x.currency||'BRL').toUpperCase()})}</div><button class="btn btn--primary" data-add="${x.id}" type="button">Adicionar ao carrinho</button></article>`).join('')||'<div class="empty">Nenhum produto disponível.</div>';list.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>addToCart(b.dataset.add,b)))}
+async function getCart(){user=user||await requireAuth();if(!user)return null;let{data,error}=await supabaseClient.from('carts').select('id').eq('user_id',user.id).maybeSingle();if(error)throw error;if(data)return data;const created=await supabaseClient.from('carts').insert({user_id:user.id,currency:'brl'}).select('id').single();if(created.error)throw created.error;return created.data}
+async function addToCart(productId,button){if(!supabaseClient)return;setButtonLoading(button,true,'Adicionando...');try{const cart=await getCart();const existing=await supabaseClient.from('cart_items').select('id,quantity').eq('cart_id',cart.id).eq('product_id',productId).maybeSingle();if(existing.error)throw existing.error;if(existing.data){const{error}=await supabaseClient.from('cart_items').update({quantity:existing.data.quantity+1,updated_at:new Date().toISOString()}).eq('id',existing.data.id);if(error)throw error}else{const product=await supabaseClient.from('products').select('price_cents').eq('id',productId).single();if(product.error)throw product.error;const{error}=await supabaseClient.from('cart_items').insert({cart_id:cart.id,product_id:productId,quantity:1,unit_price_cents:product.data.price_cents});if(error)throw error}toast('Produto adicionado ao carrinho.','success')}catch(e){toast(e.message,'error')}finally{setButtonLoading(button,false)}}
+load();

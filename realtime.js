@@ -1,0 +1,1 @@
+import{supabaseClient}from'./supabaseClient.js';export function subscribe(table,callback){if(!supabaseClient)return null;return supabaseClient.channel(`purperzone:${table}`).on('postgres_changes',{event:'*',schema:'public',table},callback).subscribe()}export function stop(channel){return supabaseClient?.removeChannel(channel)}
