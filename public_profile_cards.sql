@@ -1,3 +1,8 @@
+-- GUIA DE MANUTENÇÃO — public_profile_cards.sql
+-- Objetivo: Migração ou configuração SQL do banco de dados.
+-- Como modificar: Leia a migração inteira antes de executar. Confirme ambiente, permissões, RLS e impacto sobre dados existentes; não execute em produção sem revisão.
+-- Segurança: verifique RLS, grants e políticas antes de alterar tabelas acessíveis pelo navegador.
+
 -- PurperZone: tabela pública segura de cartões de perfil.
 -- Execute somente se estiver levando esta alteração para outro projeto Supabase.
 

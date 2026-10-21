@@ -1,4 +1,10 @@
 <!doctype html>
+<!--
+  GUIA DE MANUTENÇÃO — maintenance.html
+  Objetivo: Estrutura semântica da página e pontos de integração visual.
+  Como modificar: Edite a estrutura semântica nesta fonte e mantenha os seletores usados pelos arquivos JavaScript. A pasta dist/ é regenerada a partir da raiz.
+  Dica: mantenha IDs e atributos data-* usados pelo JavaScript; alterá-los pode quebrar interações.
+-->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
@@ -7,12 +13,14 @@
   <meta name="robots" content="noindex, nofollow">
   <title>PurperZone — Em manutenção</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- SEÇÃO: JAVASCRIPT E INTEGRAÇÕES -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <main class="auth">
+  <!-- SEÇÃO: CONTEÚDO PRINCIPAL -->
+<main class="auth">
     <section class="card auth-card" style="text-align:center">
-      <div class="brand-center"><a class="brand" href="index.html">Purper<span>Zone</span></a></div>
+      <div class="brand-center"><a class="brand" href="feed.html">Purper<span>Zone</span></a></div>
       <p class="eyebrow">PAUSA PARA MELHORAR</p>
       <h1>Estamos em manutenção</h1>
       <p id="maintenance-message" class="muted">O PurperZone está passando por melhorias. Algumas funções estão temporariamente indisponíveis para proteger seus dados.</p>

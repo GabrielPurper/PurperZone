@@ -1,1 +1,7 @@
+<% /*
+  GUIA DE MANUTENÇÃO — project-card.ejs
+  Objetivo: Fragmento reutilizável de interface renderizado por um servidor EJS.
+  Como modificar: Este arquivo é um template de servidor: GitHub Pages não executa EJS por conta própria. Preserve nomes de variáveis e escape saídas dinâmicas.
+  Segurança: escape conteúdo dinâmico e não coloque segredos ou tokens neste template.
+*/ %>
 <article class="card project-card"><div class="card__eyebrow">PROJETO</div><h3><%= project?.name || 'Projeto sem título' %></h3><p class="muted"><%= project?.description || 'Sem descrição informada.' %></p><% if (project?.tech_stack?.length) { %><p class="tag-list"><% project.tech_stack.forEach((tech) => { %><span class="tag"><%= tech %></span><% }) %></p><% } %><div class="actions"><% if (project?.repo_url) { %><a class="btn" href="<%= project.repo_url %>" target="_blank" rel="noopener noreferrer">Abrir repositório</a><% } %><a class="btn btn--primary" href="projects.html?id=<%= encodeURIComponent(project?.id || '') %>">Detalhes</a></div></article>

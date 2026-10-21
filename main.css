@@ -1,1 +1,8 @@
+/*
+ * GUIA DE MANUTENÇÃO — main.css
+ * Objetivo: Estilos e regras visuais compartilhadas.
+ * Como modificar: Prefira alterar os componentes existentes e testar telas pequenas e grandes. Confira se uma regra já existe antes de duplicá-la.
+ * Dica: procure seletores existentes antes de criar regras novas; valide desktop, tablet e celular.
+ */
+
 @import url('./style.css');

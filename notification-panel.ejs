@@ -1,1 +1,7 @@
+<% /*
+  GUIA DE MANUTENÇÃO — notification-panel.ejs
+  Objetivo: Fragmento reutilizável de interface renderizado por um servidor EJS.
+  Como modificar: Este arquivo é um template de servidor: GitHub Pages não executa EJS por conta própria. Preserve nomes de variáveis e escape saídas dinâmicas.
+  Segurança: escape conteúdo dinâmico e não coloque segredos ou tokens neste template.
+*/ %>
 <section class="card notification-panel" aria-labelledby="notification-title"><div class="page-head"><div><h2 id="notification-title"><%= title || 'Notificações' %></h2><p class="muted">Atualizações da sua atividade no PurperZone.</p></div><a class="btn" href="notifications.html">Ver todas</a></div><ul class="list"><% (notifications || []).forEach((notification) => { %><li class="notification-item"><span class="notification-item__dot" aria-hidden="true"></span><div><strong><%= notification.title || 'Atualização' %></strong><p><%= notification.body || notification.message || '' %></p><small class="muted"><%= notification.created_at ? new Date(notification.created_at).toLocaleString('pt-BR') : '' %></small></div></li><% }) %><% if (!(notifications || []).length) { %><li class="empty-state muted">Você está em dia. Nenhuma notificação por enquanto.</li><% } %></ul></section>

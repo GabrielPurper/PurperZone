@@ -1,1 +1,8 @@
+/**
+ * GUIA DE MANUTENÇÃO — moderation.js
+ * Objetivo: Lógica de interface e integração da página/módulo.
+ * Como modificar: Leia os imports para identificar dependências. Mantenha validação de dados, tratamento de erros e escape de conteúdo inserido no HTML.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 import{supabaseClient}from'./supabaseClient.js';import{escapeHtml,requireAuth}from'./app.js';const root=document.querySelector('#my-reports');async function load(){if(!root)return;if(!supabaseClient){root.innerHTML='<div class="empty">Supabase não configurado.</div>';return}const user=await requireAuth();if(!user)return;const{data,error}=await supabaseClient.from('content_reports').select('id,target_type,reason,status,created_at,category').eq('reporter_id',user.id).order('created_at',{ascending:false});if(error){root.innerHTML=`<div class="empty error">${escapeHtml(error.message)}</div>`;return}root.innerHTML=(data||[]).map(x=>`<div class="item"><strong>${escapeHtml(x.reason||'Relato')}</strong><p class="muted">${escapeHtml(x.target_type||'conteúdo')} · ${escapeHtml(x.status||'open')} · ${new Date(x.created_at).toLocaleDateString('pt-BR')}</p></div>`).join('')||'<div class="empty">Nenhum relato enviado.</div>'}load();

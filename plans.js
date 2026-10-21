@@ -1,1 +1,8 @@
+/**
+ * GUIA DE MANUTENÇÃO — plans.js
+ * Objetivo: Lógica de interface e integração da página/módulo.
+ * Como modificar: Leia os imports para identificar dependências. Mantenha validação de dados, tratamento de erros e escape de conteúdo inserido no HTML.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 import{supabaseClient}from'./supabaseClient.js';import{escapeHtml}from'./app.js';const root=document.querySelector('#plans-list');async function load(){if(!root)return;if(!supabaseClient){root.innerHTML='<div class="empty">Supabase não configurado.</div>';return}const{data,error}=await supabaseClient.from('subscription_plans').select('id,code,name,description,billing_interval,price_cents,currency,is_free,is_active').eq('is_active',true).order('sort_order',{ascending:true});if(error){root.innerHTML=`<div class="empty error">${escapeHtml(error.message)}</div>`;return}root.innerHTML=(data||[]).map(x=>`<article class="card interactive"><span class="tag">${escapeHtml(x.code||'Plano')}</span><h2>${escapeHtml(x.name||'Plano')}</h2><p class="muted">${escapeHtml(x.description||'')}</p><div class="price">${x.is_free?'Grátis':(Number(x.price_cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:x.currency||'BRL'})}</div><small class="muted">${escapeHtml(x.billing_interval||'sem cobrança')}</small></article>`).join('')||'<div class="empty">Nenhum plano ativo.</div>'}load();

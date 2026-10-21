@@ -1,11 +1,33 @@
+/**
+ * GUIA DE MANUTENÇÃO — settings.js
+ * Objetivo: Lógica de interface e integração da página/módulo.
+ * Como modificar: Leia os imports para identificar dependências. Mantenha validação de dados, tratamento de erros e escape de conteúdo inserido no HTML.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 import { supabaseClient } from './supabaseClient.js';
 import { requireAuth, toast, setInlineMessage, setButtonLoading } from './app.js';
 
+/**
+
+ * Função $: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 const $=s=>document.querySelector(s);
+/**
+ * Função $$: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+ */
 const $$=s=>[...document.querySelectorAll(s)];
 const status=$('#settings-status');
 const message=$('#settings-message');
 let user=null;
+
+/**
+
+ * Função setForm: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 function setForm(form,data={}){
   if(!form) return;
@@ -15,6 +37,9 @@ function setForm(form,data={}){
     else el.value=data[el.name]??'';
   });
 }
+/**
+ * Função getForm: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+ */
 function getForm(form){
   const data={};
   [...form.elements].forEach(el=>{
@@ -23,6 +48,9 @@ function getForm(form){
   });
   return data;
 }
+/**
+ * Função bindUpsert: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+ */
 function bindUpsert(formSelector,table,transform=(x=>x),success='Configurações salvas.'){
   const form=$(formSelector);
   form?.addEventListener('submit',async e=>{
@@ -46,11 +74,23 @@ $$('[data-settings-tab]').forEach(button=>button.addEventListener('click',()=>{
   history.replaceState(null,'',`#${tab}`);
 }));
 
+/**
+
+ * Função loadOne: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 async function loadOne(table){
   const {data,error}=await supabaseClient.from(table).select('*').eq(table==='profiles'?'id':'user_id',user.id).maybeSingle();
   if(error) throw error;
   return data||{};
 }
+
+/**
+
+ * Busca e combina conteúdo para a aba selecionada; aqui ficam filtros, tabelas consultadas e limite de resultados.
+
+ */
 
 async function load(){
   if(!supabaseClient){status.textContent='Supabase indisponível';return}

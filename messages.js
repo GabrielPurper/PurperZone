@@ -1,3 +1,10 @@
+/**
+ * GUIA DE MANUTENÇÃO — messages.js
+ * Objetivo: Lógica de interface e integração da página/módulo.
+ * Como modificar: Leia os imports para identificar dependências. Mantenha validação de dados, tratamento de erros e escape de conteúdo inserido no HTML.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 import { supabaseClient } from './supabaseClient.js';
 import { escapeHtml, toast, requireAuth, setButtonLoading } from './app.js';
 
@@ -10,12 +17,24 @@ let user = null;
 let activeConversationId = null;
 let realtimeChannel = null;
 
+/**
+
+ * Função conversationTitle: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 function conversationTitle(conversation, members = []) {
   if (conversation.title) return conversation.title;
   const others = members.filter(member => member.user_id !== user?.id);
   if (!others.length) return 'Notas pessoais';
   return others.map(member => member.profile?.display_name || member.profile?.username || 'Usuário').join(', ');
 }
+
+/**
+
+ * Função loadConversations: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 async function loadConversations() {
   if (!conversationList) return;
@@ -81,6 +100,12 @@ async function loadConversations() {
   }
 }
 
+/**
+
+ * Função selectConversation: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 async function selectConversation(conversationId) {
   activeConversationId = conversationId;
   conversationList?.querySelectorAll('[data-conversation]').forEach(button => {
@@ -91,6 +116,12 @@ async function selectConversation(conversationId) {
   subscribeRealtime();
   input?.focus();
 }
+
+/**
+
+ * Função loadMessages: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 async function loadMessages() {
   if (!messagesList || !activeConversationId) return;
@@ -119,6 +150,12 @@ async function loadMessages() {
 
   messagesList.scrollTop = messagesList.scrollHeight;
 }
+
+/**
+
+ * Função subscribeRealtime: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 function subscribeRealtime() {
   if (!supabaseClient || !activeConversationId) return;
@@ -157,6 +194,12 @@ form?.addEventListener('submit', async event => {
     setButtonLoading(button, false);
   }
 });
+
+/**
+
+ * Função init: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 async function init() {
   if (!supabaseClient) {

@@ -1,6 +1,19 @@
+/**
+ * GUIA DE MANUTENÇÃO — cart.js
+ * Objetivo: Lógica de interface e integração da página/módulo.
+ * Como modificar: Leia os imports para identificar dependências. Mantenha validação de dados, tratamento de erros e escape de conteúdo inserido no HTML.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 import{supabaseClient}from'./supabaseClient.js';import{escapeHtml,requireAuth,toast}from'./app.js';
 const list=document.querySelector('#cart-list'),total=document.querySelector('#cart-total');let user=null,cartId=null;
+/**
+ * Busca e combina conteúdo para a aba selecionada; aqui ficam filtros, tabelas consultadas e limite de resultados.
+ */
 async function load(){if(!list)return;if(!supabaseClient){list.innerHTML='<div class="empty">Supabase não configurado.</div>';return}user=await requireAuth();if(!user)return;const cart=await supabaseClient.from('carts').select('id').eq('user_id',user.id).maybeSingle();if(cart.error){list.innerHTML=`<div class="empty error">${escapeHtml(cart.error.message)}</div>`;return}if(!cart.data){cartId=null;list.innerHTML='<div class="empty">Seu carrinho está vazio.</div>';if(total)total.textContent='R$ 0,00';return}cartId=cart.data.id;const{data,error}=await supabaseClient.from('cart_items').select('id,quantity,unit_price_cents,products(name,description,image_url,currency)').eq('cart_id',cartId).order('created_at',{ascending:true});if(error){list.innerHTML=`<div class="empty error">${escapeHtml(error.message)}</div>`;return}const rows=data||[];const cents=rows.reduce((sum,x)=>sum+(Number(x.unit_price_cents||0)*Number(x.quantity||0)),0);if(total)total.textContent=(cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});list.innerHTML=rows.length?rows.map(x=>`<article class="item"><div class="item-head"><div><strong>${escapeHtml(x.products?.name||'Produto')}</strong><p class="muted">${escapeHtml(x.products?.description||'')}</p></div><button class="btn" data-remove="${x.id}" type="button">Remover</button></div><span class="muted">${x.quantity} × ${(Number(x.unit_price_cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:(x.products?.currency||'BRL').toUpperCase()})}</span></article>`).join(''):'<div class="empty">Seu carrinho está vazio.</div>';list.querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',async()=>{const{error}=await supabaseClient.from('cart_items').delete().eq('id',b.dataset.remove);if(error)toast(error.message,'error');else load()}))}
 load();
 export{getCartId};
+/**
+ * Função getCartId: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+ */
 async function getCartId(){if(cartId)return cartId;await load();return cartId}

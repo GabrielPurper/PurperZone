@@ -1,8 +1,33 @@
+/**
+ * GUIA DE MANUTENÇÃO — app.js
+ * Objetivo: Utilitários compartilhados do frontend.
+ * Como modificar: Centraliza funções reutilizadas por páginas, como escape de HTML, notificações, estado de botões e verificação de sessão. Antes de alterar uma função daqui, procure os imports para evitar regressões em várias telas.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 import { supabaseClient } from './supabaseClient.js';
 
+/**
+
+ * Função $: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 const $ = (s, root=document) => root.querySelector(s);
+/**
+ * Função $$: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+ */
 const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+/**
+ * Função escapeHtml: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+ */
 export const escapeHtml = (v='') => String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+
+/**
+
+ * Função toast: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 export const toast = (message,type='info',duration=4200) => {
   let el=$('#toast');
@@ -12,10 +37,22 @@ export const toast = (message,type='info',duration=4200) => {
   window.__purperToastTimer=setTimeout(()=>el.classList.remove('toast--visible'),duration);
 };
 
+/**
+
+ * Função setInlineMessage: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 export function setInlineMessage(target,message,type='info'){
   const el=typeof target==='string'?$(target):target; if(!el)return;
   el.hidden=false; el.className=`form-message ${type}`; el.textContent=message;
 }
+
+/**
+
+ * Função setButtonLoading: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 export function setButtonLoading(button,loading,label='Aguarde...'){
   if(!button)return;
@@ -29,6 +66,12 @@ export function setButtonLoading(button,loading,label='Aguarde...'){
 
 
 const MAINTENANCE_EXEMPT_PAGES = new Set(['maintenance.html', 'login.html', 'confirm-email.html', 'status.html']);
+
+/**
+
+ * Função enforceMaintenanceMode: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 async function enforceMaintenanceMode(){
   const current = location.pathname.split('/').pop() || 'index.html';
@@ -49,12 +92,24 @@ async function enforceMaintenanceMode(){
   }
 }
 
+/**
+
+ * Função getUser: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 export async function getUser(){
   if(!supabaseClient)return null;
   const {data,error}=await supabaseClient.auth.getUser();
   if(error)return null;
   return data.user||null;
 }
+
+/**
+
+ * Função requireAuth: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 export async function requireAuth(){
   const user=await getUser();
@@ -66,6 +121,12 @@ export async function requireAuth(){
   }
   return user;
 }
+
+/**
+
+ * Função updateAuthUI: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 function updateAuthUI(session){
   const signedIn=Boolean(session?.user);
@@ -80,6 +141,12 @@ function updateAuthUI(session){
   });
 }
 
+/**
+
+ * Função setupNav: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 export function setupNav(){
   const page=location.pathname.split('/').pop()||'index.html';
   $$('[data-nav]').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===page));
@@ -93,6 +160,12 @@ export function setupNav(){
     if(!href.startsWith('#'))document.body.classList.add('page-leaving');
   });
 }
+
+/**
+
+ * Função setupLogout: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 export function setupLogout(){
   document.addEventListener('click',async e=>{
@@ -112,11 +185,23 @@ export function setupLogout(){
   });
 }
 
+/**
+
+ * Função setupAuthAwareUI: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 export function setupAuthAwareUI(){
   if(!supabaseClient)return;
   supabaseClient.auth.getSession().then(({data})=>updateAuthUI(data.session));
   supabaseClient.auth.onAuthStateChange((_event,session)=>updateAuthUI(session));
 }
+
+/**
+
+ * Função setupPageMotion: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 function setupPageMotion(){
   document.body.classList.add('page-ready');
@@ -127,11 +212,23 @@ function setupPageMotion(){
   items.forEach(x=>observer.observe(x));
 }
 
+/**
+
+ * Função setupReturnMemory: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 export function setupReturnMemory(){
   const key='purperzone_last_page';
   if(location.pathname.endsWith('feed.html'))sessionStorage.setItem(key,location.href);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&location.pathname.endsWith('feed.html'))sessionStorage.setItem(key,location.href);});
 }
+
+/**
+
+ * Função init: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 export function init(){void enforceMaintenanceMode();setupNav();setupLogout();setupAuthAwareUI();setupReturnMemory();setupPageMotion();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 init();

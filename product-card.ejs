@@ -1,1 +1,7 @@
+<% /*
+  GUIA DE MANUTENÇÃO — product-card.ejs
+  Objetivo: Fragmento reutilizável de interface renderizado por um servidor EJS.
+  Como modificar: Este arquivo é um template de servidor: GitHub Pages não executa EJS por conta própria. Preserve nomes de variáveis e escape saídas dinâmicas.
+  Segurança: escape conteúdo dinâmico e não coloque segredos ou tokens neste template.
+*/ %>
 <article class="card product-card"><% if (product?.image_url) { %><img class="product-card__image" src="<%= product.image_url %>" alt="<%= product?.name || 'Produto' %>" loading="lazy"><% } %><div><h3><%= product?.name || 'Produto' %></h3><p class="muted"><%= product?.description || '' %></p><strong><%= new Intl.NumberFormat('pt-BR', { style: 'currency', currency: String(product?.currency || 'BRL').toUpperCase() }).format(Number(product?.price_cents || 0) / 100) %></strong><div><a class="btn btn--primary" href="store.html?product=<%= encodeURIComponent(product?.id || '') %>">Ver produto</a></div></div></article>

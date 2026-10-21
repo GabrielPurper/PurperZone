@@ -1,3 +1,10 @@
+/**
+ * GUIA DE MANUTENÇÃO — sw.js
+ * Objetivo: Lógica de interface e integração da página/módulo.
+ * Como modificar: Leia os imports para identificar dependências. Mantenha validação de dados, tratamento de erros e escape de conteúdo inserido no HTML.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 const CACHE = 'purperzone-static-v5';
 
 // Cache apenas recursos estáticos do próprio site. Não coloque HTML personalizado,

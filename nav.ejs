@@ -1,1 +1,7 @@
-<header class="topbar"><div class="container topbar-inner"><a class="brand" href="<%= homeUrl || 'feed.html' %>">Purper<span>Zone</span></a><nav class="nav" aria-label="Navegação principal"><a href="feed.html">Feed</a><a href="projects.html">Projetos</a><a href="games.html">Games</a><a href="library.html">Biblioteca</a><a href="apps.html">Apps</a><a href="store.html">Loja</a></nav><div class="top-actions"><a class="btn" href="settings.html">Configurações</a></div></div></header>
+<% /*
+  GUIA DE MANUTENÇÃO — nav.ejs
+  Objetivo: Fragmento reutilizável de interface renderizado por um servidor EJS.
+  Como modificar: Este arquivo é um template de servidor: GitHub Pages não executa EJS por conta própria. Preserve nomes de variáveis e escape saídas dinâmicas.
+  Segurança: escape conteúdo dinâmico e não coloque segredos ou tokens neste template.
+*/ %>
+<header class="topbar"><div class="container topbar-inner"><a class="brand" href="<%= homeUrl || 'feed.html' %>">Purper<span>Zone</span></a><nav class="nav" aria-label="Navegação principal"><a href="feed.html">Painel Principal</a><a href="projects.html">Projetos</a><a href="games.html">Games</a><a href="library.html">Biblioteca</a><a href="apps.html">Apps</a><a href="store.html">Loja</a></nav><div class="top-actions"><a class="btn" href="profile.html">Perfil</a><a class="btn" href="settings.html">Configurações</a></div></div></header>

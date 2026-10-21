@@ -1,1 +1,7 @@
+<% /*
+  GUIA DE MANUTENÇÃO — post-card.ejs
+  Objetivo: Fragmento reutilizável de interface renderizado por um servidor EJS.
+  Como modificar: Este arquivo é um template de servidor: GitHub Pages não executa EJS por conta própria. Preserve nomes de variáveis e escape saídas dinâmicas.
+  Segurança: escape conteúdo dinâmico e não coloque segredos ou tokens neste template.
+*/ %>
 <article class="card post-card" data-post-id="<%= post?.id || '' %>"><header class="post-card__header"><img class="avatar" src="<%= post?.author?.avatar_url || 'avatar-placeholder.svg' %>" alt="" loading="lazy"><div><strong><%= post?.author?.display_name || post?.author?.username || 'Pessoa da comunidade' %></strong><p class="muted"><%= post?.created_at ? new Date(post.created_at).toLocaleString('pt-BR') : 'Agora mesmo' %></p></div></header><div class="post-card__content"><p><%= post?.content || '' %></p><% if (post?.image_url) { %><img class="post-media" src="<%= post.image_url %>" alt="Mídia da publicação" loading="lazy"><% } %></div><footer class="post-card__actions"><button class="btn" type="button" data-post-like="<%= post?.id || '' %>">Curtir</button><a class="btn" href="post.html?id=<%= encodeURIComponent(post?.id || '') %>">Comentários</a></footer></article>

@@ -1,6 +1,22 @@
+/**
+ * GUIA DE MANUTENÇÃO — store.js
+ * Objetivo: Lógica de interface e integração da página/módulo.
+ * Como modificar: Leia os imports para identificar dependências. Mantenha validação de dados, tratamento de erros e escape de conteúdo inserido no HTML.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 import{supabaseClient}from'./supabaseClient.js';import{escapeHtml,toast,requireAuth,setButtonLoading}from'./app.js';
 const list=document.querySelector('#products-list');let user=null;
+/**
+ * Busca e combina conteúdo para a aba selecionada; aqui ficam filtros, tabelas consultadas e limite de resultados.
+ */
 async function load(){if(!list)return;if(!supabaseClient){list.innerHTML='<div class="empty">Supabase não configurado.</div>';return}const{data,error}=await supabaseClient.from('products').select('id,name,description,price_cents,currency,image_url,product_type,stock,active').eq('active',true).order('created_at',{ascending:false});if(error){list.innerHTML=`<div class="empty error">${escapeHtml(error.message)}</div>`;return}list.innerHTML=(data||[]).map(x=>`<article class="card product-card interactive">${x.image_url?`<img class="product-cover-img" src="${escapeHtml(x.image_url)}" alt="">`:'<div class="product-cover"></div>'}<span class="tag">${escapeHtml(x.product_type||'Produto')}</span><h3>${escapeHtml(x.name)}</h3><p class="muted">${escapeHtml(x.description||'')}</p><div class="price">${(Number(x.price_cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:(x.currency||'BRL').toUpperCase()})}</div><button class="btn btn--primary" data-add="${x.id}" type="button">Adicionar ao carrinho</button></article>`).join('')||'<div class="empty">Nenhum produto disponível.</div>';list.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>addToCart(b.dataset.add,b)))}
+/**
+ * Função getCart: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+ */
 async function getCart(){user=user||await requireAuth();if(!user)return null;let{data,error}=await supabaseClient.from('carts').select('id').eq('user_id',user.id).maybeSingle();if(error)throw error;if(data)return data;const created=await supabaseClient.from('carts').insert({user_id:user.id,currency:'brl'}).select('id').single();if(created.error)throw created.error;return created.data}
+/**
+ * Função addToCart: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+ */
 async function addToCart(productId,button){if(!supabaseClient)return;setButtonLoading(button,true,'Adicionando...');try{const cart=await getCart();const existing=await supabaseClient.from('cart_items').select('id,quantity').eq('cart_id',cart.id).eq('product_id',productId).maybeSingle();if(existing.error)throw existing.error;if(existing.data){const{error}=await supabaseClient.from('cart_items').update({quantity:existing.data.quantity+1,updated_at:new Date().toISOString()}).eq('id',existing.data.id);if(error)throw error}else{const product=await supabaseClient.from('products').select('price_cents').eq('id',productId).single();if(product.error)throw product.error;const{error}=await supabaseClient.from('cart_items').insert({cart_id:cart.id,product_id:productId,quantity:1,unit_price_cents:product.data.price_cents});if(error)throw error}toast('Produto adicionado ao carrinho.','success')}catch(e){toast(e.message,'error')}finally{setButtonLoading(button,false)}}
 load();

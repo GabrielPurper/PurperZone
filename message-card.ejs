@@ -1,1 +1,7 @@
+<% /*
+  GUIA DE MANUTENÇÃO — message-card.ejs
+  Objetivo: Fragmento reutilizável de interface renderizado por um servidor EJS.
+  Como modificar: Este arquivo é um template de servidor: GitHub Pages não executa EJS por conta própria. Preserve nomes de variáveis e escape saídas dinâmicas.
+  Segurança: escape conteúdo dinâmico e não coloque segredos ou tokens neste template.
+*/ %>
 <article class="card message-card" data-conversation-id="<%= message?.conversation_id || '' %>"><img class="avatar" src="<%= message?.sender?.avatar_url || 'avatar-placeholder.svg' %>" alt=""><div class="message-card__body"><strong><%= message?.sender?.display_name || message?.sender?.username || 'Mensagem' %></strong><p><%= message?.content || 'Anexo enviado' %></p><small class="muted"><%= message?.created_at ? new Date(message.created_at).toLocaleString('pt-BR') : '' %></small></div><a class="btn" href="messages.html?conversation=<%= encodeURIComponent(message?.conversation_id || '') %>">Abrir conversa</a></article>

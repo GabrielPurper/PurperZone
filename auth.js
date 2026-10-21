@@ -1,3 +1,10 @@
+/**
+ * GUIA DE MANUTENÇÃO — auth.js
+ * Objetivo: Fluxos de autenticação e estado da conta.
+ * Como modificar: Gerencia operações de login/cadastro e estado de sessão. Para provedores Google/GitHub, confira também as configurações de Auth no painel Supabase e as URLs de callback do provedor.
+ * Convenções: mantenha funções pequenas, use nomes claros, trate erros de rede e nunca exponha segredos no frontend.
+ */
+
 import { supabaseClient } from './supabaseClient.js';
 import { toast, setInlineMessage, setButtonLoading } from './app.js';
 
@@ -8,6 +15,12 @@ const params=new URLSearchParams(location.search);
 const confirmationActions=document.querySelector('#confirmation-actions');
 const resendButton=document.querySelector('#resend-confirmation');
 let lastSignupEmail='';
+
+/**
+
+ * Função friendlyAuthError: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 function friendlyAuthError(error){
   const raw=(error?.message||'').toLowerCase();
@@ -22,6 +35,12 @@ function friendlyAuthError(error){
   if(raw.includes('network')||raw.includes('fetch'))return'Não foi possível conectar ao Supabase. Verifique sua internet e tente novamente.';
   return error?.message||'Não foi possível concluir a autenticação.';
 }
+
+/**
+
+ * Função showMode: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 function showMode(mode){
   const validMode=forms.some(form=>form.dataset.authForm===mode);
@@ -69,6 +88,12 @@ const ALLOWED_REDIRECT_PAGES = new Set([
   'cart.html', 'checkout.html', 'success.html'
 ]);
 
+/**
+
+ * Função redirectTarget: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
+
 function redirectTarget(){
   const next = params.get('next');
   if (!next || next.length > 512 || next.includes('\\')) return 'feed.html';
@@ -85,6 +110,12 @@ function redirectTarget(){
     return 'feed.html';
   }
 }
+
+/**
+
+ * Função ensureProfile: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 async function ensureProfile(user,extra={}){
   if(!supabaseClient||!user)return;
@@ -111,6 +142,12 @@ async function ensureProfile(user,extra={}){
   const {error}=await supabaseClient.from('profiles').insert({id:user.id,email,username:candidate,display_name:displayName,birth_date:extra.birth_date||null,login_provider:provider,login_provider_user_id:user.identities?.find(i=>i.provider===provider)?.id||user.id,social_login_enabled:provider!=='email',last_sign_in_at:new Date().toISOString()});
   if(error&&error.code!=='23505')throw error;
 }
+
+/**
+
+ * Função finishOAuth: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
+
+ */
 
 async function finishOAuth(){
   if(!supabaseClient)return;

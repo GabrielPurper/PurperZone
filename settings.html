@@ -1,12 +1,21 @@
 <!doctype html>
+<!--
+  GUIA DE MANUTENÇÃO — settings.html
+  Objetivo: Estrutura semântica da página e pontos de integração visual.
+  Como modificar: Edite a estrutura semântica nesta fonte e mantenha os seletores usados pelos arquivos JavaScript. A pasta dist/ é regenerada a partir da raiz.
+  Dica: mantenha IDs e atributos data-* usados pelo JavaScript; alterá-los pode quebrar interações.
+-->
 <html lang="pt-BR">
-<head> <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0714"> <link rel="manifest" href="manifest.webmanifest"><title>Configurações — PurperZone</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<head> <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0714"> <link rel="manifest" href="manifest.webmanifest"><title>Configurações — PurperZone</title><link rel="stylesheet" href="style.css"><!-- SEÇÃO: JAVASCRIPT E INTEGRAÇÕES -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="app-shell">
-<header class="topbar"><div class="container topbar-inner"><button class="icon-btn mobile-toggle" data-mobile-toggle>☰</button><a class="brand" href="index.html">Purper<span>Zone</span></a><nav class="nav"><a data-nav href="feed.html">Feed</a><a data-nav href="reels.html">Reels</a><a data-nav href="projects.html">Projetos</a><a data-nav href="games.html">Games</a><a data-nav href="library.html">Biblioteca</a><a data-nav href="apps.html">Apps</a><a data-nav href="store.html">Loja</a><a data-nav href="jarvis.html">Jarvis</a></nav><div class="top-actions"><a class="btn" href="search.html">Buscar</a><a class="btn" href="profile.html">Perfil</a></div></div></header>
+<!-- SEÇÃO: NAVEGAÇÃO / CABEÇALHO -->
+<header class="topbar"><div class="container topbar-inner"><button class="icon-btn mobile-toggle" data-mobile-toggle>☰</button><a class="brand" href="feed.html">Purper<span>Zone</span></a><nav class="nav"><a data-nav href="feed.html">Painel Principal</a><a data-nav href="reels.html">Reels</a><a data-nav href="projects.html">Projetos</a><a data-nav href="games.html">Games</a><a data-nav href="library.html">Biblioteca</a><a data-nav href="apps.html">Apps</a><a data-nav href="store.html">Loja</a><a data-nav href="jarvis.html">Jarvis</a></nav><div class="top-actions"><a class="btn" href="search.html">⌕ Pesquisar</a><a class="btn" data-auth-account href="profile.html">Perfil</a></div></div></header>
+<!-- SEÇÃO: CONTEÚDO PRINCIPAL -->
 <main class="container layout settings-layout">
-<aside class="sidebar"><div class="sidebar-card"><a class="side-link" data-nav href="feed.html">◉ Feed</a><a class="side-link" data-nav href="reels.html">▷ Reels</a><a class="side-link" data-nav href="projects.html">⌘ Projetos</a><a class="side-link" data-nav href="games.html">◈ Games</a><a class="side-link" data-nav href="messages.html">✉ Mensagens</a><a class="side-link" data-nav href="notifications.html">♢ Notificações</a><a class="side-link" data-nav href="settings.html">⚙ Configurações</a><button class="side-link btn" data-logout>↪ Sair</button></div></aside>
+<aside class="sidebar"><div class="sidebar-card"><a class="side-link" data-nav href="feed.html">◉ Painel Principal</a><a class="side-link" data-nav href="reels.html">▷ Reels</a><a class="side-link" data-nav href="projects.html">⌘ Projetos</a><a class="side-link" data-nav href="games.html">◈ Games</a><a class="side-link" data-nav href="messages.html">✉ Mensagens</a><a class="side-link" href="profile.html">◉ Meu perfil</a><a class="side-link" data-nav href="notifications.html">♢ Notificações</a><a class="side-link" data-nav href="settings.html">⚙ Configurações</a><button class="side-link btn" data-logout>↪ Sair</button></div></aside>
 <section class="content settings-content">
 <div class="page-head"><div><span class="eyebrow">SUA CONTA</span><h1>Configurações</h1><p>Controle perfil, experiência, privacidade, notificações, segurança e mídia.</p></div><span id="settings-status" class="status-pill">Carregando...</span></div> <div class="settings-nav card" aria-label="Seções de configurações"> <button class="active" data-settings-tab="profile">Perfil</button><button data-settings-tab="experience">Experiência</button><button data-settings-tab="privacy">Privacidade</button><button data-settings-tab="notifications">Notificações</button><button data-settings-tab="audio">Áudio</button><button data-settings-tab="security" aria-controls="settings-security-panel">Segurança</button>
 </div>

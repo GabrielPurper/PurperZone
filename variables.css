@@ -1,1 +1,8 @@
+/*
+ * GUIA DE MANUTENÇÃO — variables.css
+ * Objetivo: Estilos e regras visuais compartilhadas.
+ * Como modificar: Prefira alterar os componentes existentes e testar telas pequenas e grandes. Confira se uma regra já existe antes de duplicá-la.
+ * Dica: procure seletores existentes antes de criar regras novas; valide desktop, tablet e celular.
+ */
+
 :root{--bg:#0b0714;--bg-soft:#100d1b;--surface:#151120;--surface-2:#1d1830;--text:#f6f3ff;--muted:#aaa2ba;--faint:#70677e;--border:#2c2640;--accent:#a96cff;--accent-strong:#c89bff;--accent-soft:rgba(169,108,255,.14);--blue:#58b8ff;--success:#65d991;--danger:#f06b67;--r:14px;--font-body:Inter,system-ui,sans-serif;--font-display:"Space Grotesk",Inter,sans-serif;--font-mono:"JetBrains Mono",monospace}
