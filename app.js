@@ -213,6 +213,42 @@ function setupPageMotion(){
 }
 
 /**
+ * Proteção dissuasória de mídia de usuários.
+ *
+ * O que faz: remove ações simples de salvar/arrastar/abrir o menu de contexto em
+ * imagens e vídeos exibidos na interface. Isso evita downloads acidentais e
+ * dificulta o salvamento casual, mas NÃO impede capturas de tela, gravação de
+ * tela, ferramentas de desenvolvedor ou cópia de URLs já acessíveis ao navegador.
+ *
+ * Segurança real: use buckets privados, URLs assinadas de curta duração e RLS
+ * correta no Supabase Storage. Mesmo assim, mídia que pode ser visualizada pode
+ * ser copiada por quem tem acesso; não prometa proteção absoluta.
+ */
+export function setupMediaDownloadDeterrence(){
+  const mediaSelector='img, video, picture, canvas, [data-protected-media]';
+  document.addEventListener('contextmenu',event=>{
+    if(event.target instanceof Element && event.target.closest(mediaSelector)) event.preventDefault();
+  });
+  document.addEventListener('dragstart',event=>{
+    if(event.target instanceof Element && event.target.closest(mediaSelector)) event.preventDefault();
+  });
+  document.addEventListener('keydown',event=>{
+    // Bloqueia atalhos comuns de salvar/imprimir apenas quando o foco está na mídia.
+    const target=event.target;
+    if(target instanceof Element && target.closest(mediaSelector) && (event.ctrlKey||event.metaKey) && ['s','p'].includes(event.key.toLowerCase())) event.preventDefault();
+  });
+  document.querySelectorAll('img, video').forEach(media=>{
+    media.setAttribute('draggable','false');
+    media.setAttribute('data-protected-media','');
+    if(media instanceof HTMLVideoElement){
+      media.setAttribute('controlsList','nodownload noremoteplayback');
+      media.setAttribute('disablePictureInPicture','');
+      media.setAttribute('oncontextmenu','return false');
+    }
+  });
+}
+
+/**
 
  * Função setupReturnMemory: implemente aqui a regra desta etapa. Ao modificar, confira entradas, retorno, tratamento de erros e efeitos na interface.
 
@@ -230,5 +266,5 @@ export function setupReturnMemory(){
 
  */
 
-export function init(){void enforceMaintenanceMode();setupNav();setupLogout();setupAuthAwareUI();setupReturnMemory();setupPageMotion();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+export function init(){void enforceMaintenanceMode();setupNav();setupLogout();setupAuthAwareUI();setupReturnMemory();setupPageMotion();setupMediaDownloadDeterrence();if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 init();

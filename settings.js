@@ -95,17 +95,19 @@ async function loadOne(table){
 async function load(){
   if(!supabaseClient){status.textContent='Supabase indisponível';return}
   user=await requireAuth(); if(!user) return;
+  refreshMfaStatus();
   status.textContent='Sincronizado com Supabase';status.classList.add('online');
   $('#settings-account-email').textContent=user.email||'Conta PurperZone';
   try{
-    const [profile,experience,privacy,notifications,audio]=await Promise.all([
-      loadOne('profiles'),loadOne('user_settings'),loadOne('user_privacy_settings'),loadOne('notification_preferences'),loadOne('user_audio_preferences')
+    const [profile,experience,privacy,notifications,audio,secondaryEmail]=await Promise.all([
+      loadOne('profiles'),loadOne('user_settings'),loadOne('user_privacy_settings'),loadOne('notification_preferences'),loadOne('user_audio_preferences'),loadOne('account_contact_emails').catch(()=>({}))
     ]);
     setForm($('#profile-settings'),{...profile,email:user.email||profile.email||''});
     setForm($('#experience-settings'),experience);
     setForm($('#privacy-settings'),privacy);
     setForm($('#notification-settings'),notifications);
     setForm($('#audio-settings'),audio);
+    setForm($('#secondary-email-form'),secondaryEmail);
     $('#settings-account-name').textContent=profile.display_name||profile.username||'Minha conta';
     $('#security-summary').innerHTML=`<div><span>E-mail</span><strong>${user.email||'—'}</strong></div><div><span>Último login</span><strong>${user.last_sign_in_at?new Date(user.last_sign_in_at).toLocaleString('pt-BR'):'—'}</strong></div><div><span>Provedor</span><strong>${user.app_metadata?.provider||'email'}</strong></div>`;
   }catch(error){setInlineMessage(message,'Algumas configurações não puderam ser carregadas: '+error.message,'error')}
@@ -125,6 +127,23 @@ $('#password-form')?.addEventListener('submit',async e=>{
   if(error) return setInlineMessage(message,error.message,'error');
   form.reset();setInlineMessage(message,'Senha atualizada com sucesso.','success');toast('Senha atualizada.','success');
 });
+
+/** MFA/TOTP: enrollment is performed by Supabase Auth; never store TOTP secrets in app tables. */
+let pendingMfaFactorId = null;
+async function refreshMfaStatus(){
+ const label=$('#mfa-status'), enroll=$('#mfa-enroll'), verify=$('#mfa-verify'), disable=$('#mfa-disable');
+ if(!supabaseClient?.auth?.mfa){label.textContent='MFA indisponível nesta versão';enroll.disabled=true;return}
+ try{const {data,error}=await supabaseClient.auth.mfa.listFactors();if(error)throw error;const factors=[...(data?.totp||[])];const verified=factors.find(x=>x.status==='verified');label.textContent=verified?'Ativa · autenticador TOTP':'Não configurada';enroll.hidden=Boolean(verified);disable.hidden=!verified;verify.hidden=!pendingMfaFactorId;}
+ catch(e){label.textContent='Não foi possível consultar MFA';toast(e.message||'Falha ao consultar MFA.','error')}
+}
+$('#mfa-enroll')?.addEventListener('click',async()=>{
+ try{const {data,error}=await supabaseClient.auth.mfa.enroll({factorType:'totp',friendlyName:'PurperZone Authenticator'});if(error)throw error;pendingMfaFactorId=data.id;const box=$('#mfa-enrollment');box.hidden=false;box.replaceChildren();const title=document.createElement('p');title.textContent='Escaneie o QR code no aplicativo autenticador e confirme com o código de 6 dígitos.';box.append(title);const img=document.createElement('img');img.alt='QR code para configurar verificação em duas etapas';img.className='mfa-qr';img.src=data.totp.qr_code;box.append(img);const secret=document.createElement('p');secret.textContent='Chave manual: '+data.totp.secret;box.append(secret);const input=document.createElement('input');input.id='mfa-code';input.inputMode='numeric';input.autocomplete='one-time-code';input.maxLength=6;input.placeholder='Código de 6 dígitos';input.setAttribute('aria-label','Código do autenticador');box.append(input);$('#mfa-verify').hidden=false;toast('Leia o QR code e confirme o código.','success');}
+ catch(e){toast(e.message||'Não foi possível iniciar a verificação em duas etapas.','error')}
+});
+$('#mfa-verify')?.addEventListener('click',async()=>{const code=$('#mfa-code')?.value.trim();if(!pendingMfaFactorId||!/^\d{6}$/.test(code||''))return toast('Digite o código de 6 dígitos do autenticador.','error');try{const {error}=await supabaseClient.auth.mfa.challengeAndVerify({factorId:pendingMfaFactorId,code});if(error)throw error;pendingMfaFactorId=null;$('#mfa-enrollment').hidden=true;toast('Verificação em duas etapas ativada.','success');refreshMfaStatus()}catch(e){toast(e.message||'Código inválido ou expirado.','error')}});
+$('#mfa-disable')?.addEventListener('click',async()=>{if(!confirm('Desativar a verificação em duas etapas desta conta?'))return;try{const {data,error}=await supabaseClient.auth.mfa.listFactors();if(error)throw error;const factor=(data?.totp||[]).find(x=>x.status==='verified');if(!factor)return refreshMfaStatus();const {error:removeError}=await supabaseClient.auth.mfa.unenroll({factorId:factor.id});if(removeError)throw removeError;toast('Verificação em duas etapas desativada.','success');refreshMfaStatus()}catch(e){toast(e.message||'Não foi possível desativar MFA.','error')}});
+$('#secondary-email-form')?.addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget;const email=String(form.email.value||'').trim().toLowerCase();if(!email||!email.includes('@'))return toast('Informe um e-mail válido.','error');if(email===String(user?.email||'').toLowerCase())return toast('O e-mail secundário precisa ser diferente do principal.','error');const button=form.querySelector('[type="submit"]');setButtonLoading(button,true,'Salvando…');try{const payload={user_id:user.id,secondary_email:email,purpose:form.purpose.value,verified_at:null,updated_at:new Date().toISOString()};const {error}=await supabaseClient.from('account_contact_emails').upsert(payload,{onConflict:'user_id'});if(error)throw error;setInlineMessage(message,'E-mail secundário salvo como contato privado. Ele ainda não está verificado e não deve ser usado para recuperação até confirmar sua posse.','success');toast('E-mail secundário salvo; falta verificar o endereço.','success')}catch(err){setInlineMessage(message,'Não foi possível salvar. Aplique a migration supabase/stories-and-account-security.sql. '+(err.message||''),'error')}finally{setButtonLoading(button,false)}});
+$('#secondary-email-remove')?.addEventListener('click',async()=>{try{const {error}=await supabaseClient.from('account_contact_emails').delete().eq('user_id',user.id);if(error)throw error;$('#secondary-email-form').reset();toast('E-mail secundário removido.','success')}catch(e){toast(e.message||'Não foi possível remover o e-mail secundário.','error')}});
 
 const initialTab=location.hash.slice(1);if(initialTab){document.querySelector(`[data-settings-tab="${initialTab}"]`)?.click()}
 load();

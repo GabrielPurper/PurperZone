@@ -41,3 +41,17 @@ A função pública `get_maintenance_status()` retorna apenas os campos necessá
 - As Edge Functions `stripe-create-checkout`, `social-connect-start` e `social-connect-callback` consultam o modo de manutenção; o checkout também verifica a identidade do token e restringe URLs de retorno a origens permitidas.
 - O Security Advisor do Supabase retornou zero lints nesta revisão.
 - Validação local do ZIP: 28 arquivos JavaScript sem erro de sintaxe, 24 páginas HTML, zero referências locais ausentes, 12 templates EJS não vazios e integridade do arquivo ZIP confirmada.
+
+
+## Proteção de fotos e Reels de outras pessoas
+
+O frontend agora aplica medidas dissuasórias: oculta controles de download de vídeos compatíveis, desativa arrastar mídia e bloqueia o menu de contexto diretamente sobre imagens/vídeos. Isso reduz salvamentos casuais, mas não torna a mídia impossível de copiar. Se o navegador consegue exibir um arquivo, alguém pode capturá-lo, gravar a tela ou usar ferramentas externas.
+
+Antes de publicar em produção, confirme no Supabase Storage que o bucket `post-media` é privado e que suas políticas permitem somente as operações necessárias. O frontend usa URLs assinadas temporárias para Reels; o tempo de validade atual é de até uma hora em `reels.js` e 30 minutos na seção gamer de `games.js`. Reduzir a validade não impede cópia durante o acesso e exige considerar reprodução/streaming. Não torne o bucket público para resolver falhas de reprodução.
+
+A regra do produto é não oferecer botão de download para conteúdo de terceiros. Mídia própria poderá ter uma opção de exportação separada no futuro, validando a autoria no servidor. Para proteção mais forte, use processamento/streaming e controles no backend, sabendo que nenhuma solução impede completamente capturas da tela.
+
+## Biblioteca em galeria unificada (2026-10-21)
+A página `library.html` reúne posts públicos, fotos, Reels, código, projetos e games em uma grade visual com filtros. A lógica está em `library.js`; os estilos isolados da galeria ficam no fim de `style.css`. A coleção pessoal `library_items` continua disponível em seção expansível.
+
+A galeria consulta apenas posts com `status = published`, `visibility = public` e `deleted_at IS NULL`, além de projetos e games marcados como públicos. O frontend não substitui as políticas RLS: confirme que as permissões reais no Supabase seguem a mesma regra. Para anexos, o cliente solicita URLs assinadas temporárias; a mídia ainda pode ser capturada por screenshot, gravação ou ferramentas externas.

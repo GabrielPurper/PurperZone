@@ -10,6 +10,9 @@ import { escapeHtml, toast, requireAuth, setButtonLoading } from './app.js';
 
 const list=document.querySelector('#feed-list'), form=document.querySelector('#post-form');
 const tabs=[...document.querySelectorAll('[data-feed-mode]')];
+const categoryTabs=[...document.querySelectorAll('[data-feed-category]')];
+const storiesList=document.querySelector('#stories-list'), storyForm=document.querySelector('#story-form');
+let category='all';
 const searchInput=document.querySelector('#global-search'), suggestions=document.querySelector('#search-suggestions');
 let user=null, mode='for-you', loading=false, searchTimer;
 
@@ -27,7 +30,7 @@ function renderPost(post,profile,liked=false){
   const author=profile?.display_name||profile?.username||'Usuário PurperZone';
   const isReel=post.metadata?.content_type==='reel';
   const contentType=isReel?'Reel':(post.metadata?.content_type==='code'?'Código':'Publicação');
-  return `<article class="card post-card interactive">
+  return `<article class="card post-card interactive" data-feed-item="${post.metadata?.content_type==='code'||post.metadata?.content_type==='project'?'code':post.metadata?.content_type==='game'?'games':'social'}">
     <div class="post-meta"><span class="mini-avatar">${escapeHtml(author.slice(0,1).toUpperCase())}</span><div><strong>${escapeHtml(author)}</strong><span>${escapeHtml(safeDate(post.created_at))} · ${contentType}</span></div></div>
     <div class="post-content">${escapeHtml(post.content||'')}</div>
     ${post.metadata?.content_type==='code'?'<span class="tag">Código</span>':''}
@@ -37,11 +40,11 @@ function renderPost(post,profile,liked=false){
 /**
  * Monta um cartão de projeto da comunidade a partir dos campos retornados pelo banco.
  */
-function renderProject(x){return `<article class="card mixed-content-card"><span class="tag">Projeto</span><h3>${escapeHtml(x.name||'Projeto da comunidade')}</h3><p>${escapeHtml(x.description||'Projeto compartilhado no PurperZone.')}</p>${x.repo_url?`<a class="btn" href="${escapeHtml(x.repo_url)}" target="_blank" rel="noopener noreferrer">Abrir repositório ↗</a>`:''}<small>${escapeHtml(safeDate(x.created_at))}</small></article>`}
+function renderProject(x){return `<article class="card mixed-content-card" data-feed-item="code"><span class="tag">Projeto / código</span><h3>${escapeHtml(x.name||'Projeto da comunidade')}</h3><p>${escapeHtml(x.description||'Projeto compartilhado no PurperZone.')}</p>${x.repo_url?`<a class="btn" href="${escapeHtml(x.repo_url)}" target="_blank" rel="noopener noreferrer">Abrir repositório ↗</a>`:''}<small>${escapeHtml(safeDate(x.created_at))}</small></article>`}
 /**
  * Monta um cartão de jogo cadastrado pela comunidade.
  */
-function renderGame(x){return `<article class="card mixed-content-card"><span class="tag">Game da comunidade</span><h3>${escapeHtml(x.name||'Jogo')}</h3><p>${escapeHtml((x.platforms||[]).join(', ')||'Descoberta da comunidade')}</p><a class="btn" href="games.html">Ver Games ↗</a></article>`}
+function renderGame(x){return `<article class="card mixed-content-card" data-feed-item="games"><span class="tag">Game da comunidade</span><h3>${escapeHtml(x.name||'Jogo')}</h3><p>${escapeHtml((x.platforms||[]).join(', ')||'Descoberta da comunidade')}</p><a class="btn" href="games.html">Ver Games ↗</a></article>`}
 
 /**
 
@@ -75,7 +78,7 @@ async function load(modeOverride=mode){
   ...((gameRes.data||[]).map(x=>({date:x.created_at,html:renderGame(x),kind:'game'})))
  ].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
  list.innerHTML=entries.length?entries.map(x=>x.html).join(''):'<div class="empty"><strong>Seu painel está começando.</strong><br>Publique algo, siga pessoas ou explore Games e Projetos para descobrir a comunidade.</div>';
- bindInteractions();loading=false;
+ bindInteractions();applyCategory();loading=false;
 }
 /**
  * Alterna a curtida no banco e atualiza o estado visual do botão.
@@ -95,12 +98,14 @@ function bindInteractions(){
 }
 form?.addEventListener('submit',async e=>{
  e.preventDefault();if(!supabaseClient)return toast('Supabase não configurado.','error');user=user||await requireAuth();if(!user)return;
- const content=String(new FormData(form).get('content')||'').trim();if(!content)return toast('Escreva algo antes de publicar.','error');
+ const fd=new FormData(form),content=String(fd.get('content')||'').trim(),contentType=String(fd.get('content_type')||'post');if(!content)return toast('Escreva algo antes de publicar.','error');
  const button=form.querySelector('button[type="submit"]');setButtonLoading(button,true,'Publicando…');
- const {error}=await supabaseClient.from('posts').insert({content,author_id:user.id,status:'published',visibility:'public',metadata:{content_type:'post'}});
+ const {error}=await supabaseClient.from('posts').insert({content,author_id:user.id,status:'published',visibility:'public',metadata:{content_type:contentType}});
  setButtonLoading(button,false);if(error)toast(error.message,'error');else{form.reset();toast('Publicação criada.','success');load(mode)}
 });
 tabs.forEach(tab=>tab.addEventListener('click',()=>{tabs.forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false')});tab.classList.add('active');tab.setAttribute('aria-selected','true');load(tab.dataset.feedMode)}));
+function applyCategory(){list?.querySelectorAll('[data-feed-item]').forEach(card=>{card.hidden=category!=='all'&&card.dataset.feedItem!==category})}
+categoryTabs.forEach(tab=>tab.addEventListener('click',()=>{category=tab.dataset.feedCategory;categoryTabs.forEach(x=>x.classList.toggle('active',x===tab));applyCategory()}));
 /**
  * Debounce da busca rápida e montagem de sugestões por categoria.
  */
@@ -130,3 +135,21 @@ searchInput?.addEventListener('input',()=>searchNow(searchInput.value));
 document.addEventListener('click',e=>{if(!e.target.closest('.pz-searchbox')&&suggestions)suggestions.hidden=true});
 document.querySelector('[data-feed-mode="for-you"]')?.setAttribute('aria-selected','true');
 load();
+(async()=>{user=user||await requireAuth();if(user)loadStories()})();
+
+
+/** Stories: conteúdo temporário de 24 horas. Requer a migration supabase/stories-and-account-security.sql. */
+async function loadStories(){
+ if(!storiesList||!supabaseClient)return;
+ const {data,error}=await supabaseClient.from('stories').select('id,author_id,content,media_url,created_at,expires_at').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(30);
+ if(error){storiesList.innerHTML='<div class="story-loading">Stories ainda não estão disponíveis. Aplique a migration SQL incluída no ZIP.</div>';return}
+ const rows=data||[], ids=[...new Set(rows.map(x=>x.author_id))];let profiles={};
+ if(ids.length){const {data:p}=await supabaseClient.from('public_profile_cards').select('id,display_name,username,avatar_url').in('id',ids);profiles=Object.fromEntries((p||[]).map(x=>[x.id,x]))}
+ storiesList.innerHTML=[{id:'create',author_id:user?.id,content:'Compartilhe um momento',isCreate:true},...rows].map(x=>{const p=profiles[x.author_id]||{},name=p.display_name||p.username||(x.isCreate?'Seu story':'Pessoa da comunidade');const avatar=p.avatar_url;return `<button type="button" class="story-bubble ${x.isCreate?'story-bubble--create':''}" ${x.isCreate?'data-story-new':`data-story-open="${escapeHtml(x.id)}"`} ${x.isCreate?'':`data-story-content="${escapeHtml(x.content||'')}" data-story-media="${escapeHtml(x.media_url||'')}"`}><span class="story-ring">${avatar?`<img src="${escapeHtml(avatar)}" alt="">`:`<span>${escapeHtml(name.slice(0,1).toUpperCase())}</span>`}</span><span>${escapeHtml(name.slice(0,18))}</span></button>`}).join('');
+ storiesList.querySelector('[data-story-new]')?.addEventListener('click',()=>{storyForm.hidden=false;document.querySelector('#story-content')?.focus()});
+ storiesList.querySelectorAll('[data-story-open]').forEach(b=>b.addEventListener('click',()=>{const content=b.dataset.storyContent||'',media=b.dataset.storyMedia||'';const url=media&&safeHttpUrl(media);const path=(url?new URL(url).pathname:'').toLowerCase();const mediaView=url&&/\.(png|jpe?g|gif|webp|avif)$/.test(path)?`<img class="story-media-preview" src="${escapeHtml(url)}" alt="Mídia do story" loading="lazy" draggable="false" data-protected-media oncontextmenu="return false">`:url&&/\.(mp4|webm|ogg)$/.test(path)?`<video class="story-media-preview" src="${escapeHtml(url)}" controls controlsList="nodownload noremoteplayback" disablePictureInPicture draggable="false" data-protected-media oncontextmenu="return false" playsinline preload="metadata"></video>`:url?'<p class="muted">Este formato de mídia não pode ser exibido aqui.</p>':'';const overlay=document.createElement('div');overlay.className='story-viewer';overlay.innerHTML=`<div class="story-viewer-card"><button type="button" class="story-close" aria-label="Fechar">×</button>${mediaView}<p>${escapeHtml(content)}</p><small>Este story expira após 24 horas.</small></div>`;document.body.append(overlay);overlay.querySelector('.story-close').addEventListener('click',()=>overlay.remove());overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()})}));
+}
+function safeHttpUrl(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}}
+document.querySelector('#story-create')?.addEventListener('click',async()=>{user=user||await requireAuth();if(!user)return;storyForm.hidden=!storyForm.hidden});
+document.querySelector('#story-cancel')?.addEventListener('click',()=>{storyForm.reset();storyForm.hidden=true});
+storyForm?.addEventListener('submit',async e=>{e.preventDefault();user=user||await requireAuth();if(!user)return;const fd=new FormData(storyForm),content=String(fd.get('content')||'').trim(),media=String(fd.get('media_url')||'').trim();if(!content&&!media)return toast('Adicione um texto ou link de mídia.','error');if(media&&!safeHttpUrl(media))return toast('Use um link HTTP ou HTTPS válido.','error');const button=storyForm.querySelector('[type="submit"]');setButtonLoading(button,true,'Publicando…');const now=Date.now();const {error}=await supabaseClient.from('stories').insert({author_id:user.id,content,media_url:media||null,created_at:new Date(now).toISOString(),expires_at:new Date(now+24*60*60*1000).toISOString()});setButtonLoading(button,false);if(error)toast('Não foi possível publicar story. Verifique a migration SQL e as políticas RLS.','error');else{storyForm.reset();storyForm.hidden=true;toast('Story publicado por 24 horas.','success');loadStories()}});

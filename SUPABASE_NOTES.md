@@ -53,3 +53,13 @@ O checkout usa a Edge Function `stripe-create-checkout` existente no Supabase. O
 ## Segurança
 
 Após as alterações, o Security Advisor do Supabase não apresentou lints de segurança.
+
+## Atualização 2026-10-22 — segurança e marketplace
+
+O banco conectado agora inclui `freelancer_profiles`, `freelance_services`, `freelance_jobs`, `freelance_proposals`, `freelance_contracts`, `freelance_milestones`, `freelance_payments`, `freelance_reviews`, `freelance_disputes`, `business_organizations`, `business_organization_members`, `game_access_offers` e `game_access_entitlements`. Veja `PURPERZONE-MARKETPLACE-ROADMAP.md` para os limites atuais e próximos passos.
+
+A migração também corrigiu a view `public_profiles` para usar `public_profile_cards` com RLS de visibilidade e criou as tabelas `stories` e `account_contact_emails`, que o frontend já esperava encontrar.
+
+A estrutura de dados não significa que o marketplace já está pronto para vender: o frontend, os endpoints confiáveis de contrato/checkout, Stripe Connect e os testes reais ainda precisam ser implementados. O teste de jogo de 5 dias está preparado no banco; o conteúdo do jogo só deve ser liberado por um servidor/endpoint que valide o direito de acesso.
+
+A revisão P0 também corrigiu a visibilidade por campo: a view `public_profiles` não deve revelar país, estado ou cidade se o usuário configurou esses campos como privados. A função interna de leitura aplica `profile_visibility_rules` antes de devolver os dados.

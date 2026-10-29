@@ -62,3 +62,11 @@ O registro das melhorias de índices e das verificações realizadas em 18/10/20
 - O logotipo das páginas internas retorna ao Painel Principal. Na página inicial, o link da marca e os CTAs mudam para o painel quando já existe uma sessão.
 
 **Limites de integrações externas:** APIs públicas podem impor CORS, limites de requisições, alterar formatos ou ficar indisponíveis. O site mostra links de fallback. A integração direta com Medal, notificações persistentes de promoções e um feed externo de notícias completo exigem integração/API própria e não são simulados como se estivessem ativos.
+
+## Atualização de produto — 22/10/2026
+
+- **Segurança de perfis:** `public_profiles` usa `public_profile_cards` com `security_invoker`; a leitura pública respeita a regra de visibilidade.
+- **Marketplace freelance:** a base Supabase para profissionais, serviços, vagas, propostas, contratos, etapas, pagamentos, avaliações, disputas e organizações empresariais foi criada.
+- **Jogos pagos e testes:** o Supabase agora suporta ofertas por jogo e um teste configurável (5 dias por padrão), com um único teste por usuário/jogo e direitos de acesso separados do catálogo.
+- **Pendente:** interface de marketplace, Edge Functions de contratação/checkout, Stripe Connect, liberação real de jogos no servidor e testes integrados.
+- **Ação manual de segurança:** ativar a proteção contra senhas vazadas em Authentication → Settings / Password Security se disponível no plano. Consulte `PURPERZONE-MARKETPLACE-ROADMAP.md`.

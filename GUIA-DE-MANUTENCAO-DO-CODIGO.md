@@ -38,3 +38,12 @@ Este guia acompanha os comentários adicionados aos arquivos-fonte. Os comentár
 ## Por que há comentários em arquivos HTML, CSS, JavaScript, EJS e SQL?
 
 Os comentários estruturados foram inseridos dentro dos próprios arquivos para que apareçam ao abrir o código no repositório. Arquivos JSON e `manifest.webmanifest` permanecem sem comentários porque comentários não são válidos nesses formatos e podem quebrar a leitura.
+
+## Stories, publicação e segurança da conta (21/10/2026)
+
+- `feed.html` contém o bloco visual de Stories, o formulário temporário e os filtros do painel. Preserve os IDs `stories-list`, `story-form`, `story-create`, `story-cancel`, `story-content` e `story-media-url`, pois são usados em `feed.js`.
+- `feed.js` consulta `public.stories`, mostra somente itens cuja expiração ainda está no futuro e grava o fim de validade em 24 horas. O seletor de publicação envia `metadata.content_type` com `post`, `code`, `project` ou `game`; para alterar categorias, ajuste `applyCategory()` e os atributos `data-feed-item` dos cartões.
+- `settings.html` adiciona a interface de MFA/TOTP e e-mail secundário. `settings.js` usa `supabaseClient.auth.mfa` para cadastrar/verificar/remover o fator TOTP e usa `account_contact_emails` para o contato privado.
+- `supabase/stories-and-account-security.sql` cria as tabelas e políticas RLS. Execute a migration no SQL Editor antes de testar Stories e e-mail secundário. Não copie segredos de MFA para o banco da aplicação.
+- O e-mail secundário ainda precisa de um fluxo de verificação por OTP/link antes de ser considerado comprovado ou usado para recuperação. Não exponha essa tabela em views públicas.
+- Os arquivos equivalentes de produção também foram atualizados em `dist/`; se seu deploy gerar `dist/` novamente, verifique se o processo de build não sobrescreve mudanças manuais.
